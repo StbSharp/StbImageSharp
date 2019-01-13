@@ -112,7 +112,7 @@ namespace StbImageSharp.Testing
 		{
 			try
 			{
-				var imagesPath = "..\\..\\..\\..\\TestImages";
+				var imagesPath = "..\\..\\..\\TestImages";
 
 				var files = Directory.EnumerateFiles(imagesPath, "*.*", SearchOption.AllDirectories).ToArray();
 				Log("Files count: {0}", files.Length);
