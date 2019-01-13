@@ -5,10 +5,9 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using StbImageSharp;
 using StbNative;
 
-namespace StbSharp.Tests
+namespace StbImageSharp.Testing
 {
 	internal static class Program
 	{
@@ -111,25 +110,32 @@ namespace StbSharp.Tests
 
 		public static bool RunTests()
 		{
-			var imagesPath = "..\\..\\..\\TestImages";
-
-			var files = Directory.EnumerateFiles(imagesPath, "*.*", SearchOption.AllDirectories).ToArray();
-			Log("Files count: {0}", files.Length);
-
-			foreach (var file in files)
+			try
 			{
-				Task.Factory.StartNew(() => { ThreadProc(file); });
-				tasksStarted++;
-			}
+				var imagesPath = "..\\..\\..\\..\\TestImages";
 
-			while (true)
-			{
-				Thread.Sleep(1000);
+				var files = Directory.EnumerateFiles(imagesPath, "*.*", SearchOption.AllDirectories).ToArray();
+				Log("Files count: {0}", files.Length);
 
-				if (tasksStarted == 0)
+				foreach (var file in files)
 				{
-					break;
+					Task.Factory.StartNew(() => { ThreadProc(file); });
+					tasksStarted++;
 				}
+
+				while (true)
+				{
+					Thread.Sleep(1000);
+
+					if (tasksStarted == 0)
+					{
+						break;
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex);
 			}
 
 			return true;
