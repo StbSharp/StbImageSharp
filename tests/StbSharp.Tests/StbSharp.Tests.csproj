@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="$(SolutionDir)SolutionDefines.targets" />
+  
+  <PropertyGroup>
+    <TargetFramework>net45</TargetFramework>
+    <OutputType>WinExe</OutputType>
+    <ApplicationIcon />
+    <StartupObject />
+    <AssemblyName>StbImageSharp.Testing</AssemblyName>
+    <RootNamespace>StbImageSharp.Testing</RootNamespace>
+  </PropertyGroup> 
+</Project>

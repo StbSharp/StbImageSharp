@@ -5,627 +5,63 @@ namespace StbImageSharp
 {
 	public unsafe class PngDecoder : BaseDecoder
 	{
-		public const int STBI__F_none = 0;
-		public const int STBI__F_sub = 1;
-		public const int STBI__F_up = 2;
-		public const int STBI__F_avg = 3;
-		public const int STBI__F_paeth = 4;
-		public const int STBI__F_avg_first = 5;
-		public const int STBI__F_paeth_first = 6;
-
-		public int[] stbi__zlength_base =
+		public enum F
 		{
-			3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 15, 17, 19, 23, 27, 31, 35, 43, 51, 59, 67,
-			83, 99, 115, 131, 163, 195, 227, 258, 0, 0
+			none = 0,
+			sub = 1,
+			up = 2,
+			avg = 3,
+			paeth = 4,
+			avg_first = 5,
+			paeth_first = 6
+		}
+
+		public static readonly byte[] PngSignature = { 137, 80, 78, 71, 13, 10, 26, 10 };
+
+		public static readonly F[] FirstRowFilter =
+		{
+			F.none,
+			F.sub,
+			F.none,
+			F.avg_first,
+			F.paeth_first
 		};
 
-		public int[] stbi__zlength_extra =
-		{
-			0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5,
-			5, 5, 5, 0, 0, 0
-		};
+		public static readonly byte[] DepthScaleTable = { 0, 0xff, 0x55, 0, 0x11, 0, 0, 0, 0x01 };
 
-		public int[] stbi__zdist_base =
-		{
-			1, 2, 3, 4, 5, 7, 9, 13, 17, 25, 33, 49, 65, 97, 129, 193, 257, 385, 513, 769,
-			1025, 1537, 2049, 3073, 4097, 6145, 8193, 12289, 16385, 24577, 0, 0
-		};
-
-		public int[] stbi__zdist_extra =
-		{
-			0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11,
-			11, 12, 12, 13, 13
-		};
-
-		public byte[] length_dezigzag = { 16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15 };
-
-		public byte[] stbi__zdefault_length =
-		{
-			8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-			8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-			8, 8, 8,
-			8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-			8, 8, 8,
-			8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-			8, 8, 8,
-			8, 8, 8, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
-			9, 9, 9,
-			9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
-			9, 9, 9,
-			9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,
-			9, 7, 7,
-			7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 8, 8
-		};
-
-		public byte[] stbi__zdefault_distance =
-		{
-			5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
-			5, 5, 5, 5, 5, 5, 5, 5
-		};
-
-		public byte[] png_sig = { 137, 80, 78, 71, 13, 10, 26, 10 };
-
-		public byte[] first_row_filter =
-		{
-			STBI__F_none, STBI__F_sub, STBI__F_none, STBI__F_avg_first,
-			STBI__F_paeth_first
-		};
-
-		public byte[] stbi__depth_scale_table = { 0, 0xff, 0x55, 0, 0x11, 0, 0, 0, 0x01 };
 		public int stbi__unpremultiply_on_load = 0;
 		public int stbi__de_iphone_flag = 0;
 
 		[StructLayout(LayoutKind.Sequential)]
-		public struct stbi__zhuffman
-		{
-			public fixed ushort fast[1 << 9];
-			public fixed ushort firstcode[16];
-			public fixed int maxcode[17];
-			public fixed ushort firstsymbol[16];
-			public fixed byte size[288];
-			public fixed ushort value[288];
-		}
-
-		[StructLayout(LayoutKind.Sequential)]
-		public struct stbi__zbuf
-		{
-			public byte* zbuffer;
-			public byte* zbuffer_end;
-			public int num_bits;
-			public uint code_buffer;
-			public sbyte* zout;
-			public sbyte* zout_start;
-			public sbyte* zout_end;
-			public int z_expandable;
-			public stbi__zhuffman z_length;
-			public stbi__zhuffman z_distance;
-		}
-
-		[StructLayout(LayoutKind.Sequential)]
-		public struct stbi__pngchunk
+		public struct PngChunk
 		{
 			public uint length;
 			public uint type;
 		}
 
-		public byte* idata;
-		public byte* expanded;
+		public byte* _idata;
+		public byte* _expanded;
 		public byte* _out_;
-		public int depth;
+		public int _depth;
 
-		public int ZbuildHuffman(stbi__zhuffman* z, byte* sizelist, int num)
+		public PngChunk GetChunkHeader()
 		{
-			int i;
-			int k = 0;
-			int code;
-			int* next_code = stackalloc int[16];
-			int* sizes = stackalloc int[17];
-			CRuntime.memset(sizes, 0, (ulong)sizeof(int));
-			CRuntime.memset(z->fast, 0, (ulong)((1 << 9) * sizeof(ushort)));
-			for (i = 0; i < num; ++i)
-			{
-				++sizes[sizelist[i]];
-			}
-
-			sizes[0] = 0;
-			for (i = 1; i < 16; ++i)
-			{
-				if (sizes[i] > (1 << i))
-					throw new Exception("bad sizes");
-			}
-
-			code = 0;
-			for (i = 1; i < 16; ++i)
-			{
-				next_code[i] = code;
-				z->firstcode[i] = (ushort)code;
-				z->firstsymbol[i] = (ushort)k;
-				code = code + sizes[i];
-				if (sizes[i] != 0)
-					if ((code - 1) >= (1 << i))
-						throw new Exception("bad codelengths");
-				z->maxcode[i] = code << (16 - i);
-				code <<= 1;
-				k += sizes[i];
-			}
-
-			z->maxcode[16] = 0x10000;
-			for (i = 0; i < num; ++i)
-			{
-				int s = sizelist[i];
-				if (s != 0)
-				{
-					int c = next_code[s] - z->firstcode[s] + z->firstsymbol[s];
-					ushort fastv = (ushort)((s << 9) | i);
-					z->size[c] = (byte)s;
-					z->value[c] = (ushort)i;
-					if (s <= 9)
-					{
-						int j = Utility.stbi__bit_reverse(next_code[s], s);
-						while (j < (1 << 9))
-						{
-							z->fast[j] = fastv;
-							j += 1 << s;
-						}
-					}
-
-					++next_code[s];
-				}
-			}
-
-			return 1;
-		}
-
-		public byte stbi__zget8(stbi__zbuf* z)
-		{
-			if (z->zbuffer >= z->zbuffer_end)
-				return 0;
-			return *z->zbuffer++;
-		}
-
-		public void stbi__fill_bits(stbi__zbuf* z)
-		{
-			do
-			{
-				z->code_buffer |= (uint)stbi__zget8(z) << z->num_bits;
-				z->num_bits += 8;
-			} while (z->num_bits <= 24);
-		}
-
-		public uint stbi__zreceive(stbi__zbuf* z, int n)
-		{
-			uint k;
-			if (z->num_bits < n)
-				stbi__fill_bits(z);
-			k = (uint)(z->code_buffer & ((1 << n) - 1));
-			z->code_buffer >>= n;
-			z->num_bits -= n;
-			return k;
-		}
-
-		public int stbi__zhuffman_decode_slowpath(stbi__zbuf* a, stbi__zhuffman* z)
-		{
-			int b;
-			int s;
-			int k;
-			k = Utility.stbi__bit_reverse((int)a->code_buffer, 16);
-			for (s = 9 + 1; ; ++s)
-			{
-				if (k < z->maxcode[s])
-					break;
-			}
-
-			if (s == 16)
-				return -1;
-			b = (k >> (16 - s)) - z->firstcode[s] + z->firstsymbol[s];
-			a->code_buffer >>= s;
-			a->num_bits -= s;
-			return z->value[b];
-		}
-
-		public int stbi__zhuffman_decode(stbi__zbuf* a, stbi__zhuffman* z)
-		{
-			int b;
-			int s;
-			if (a->num_bits < 16)
-				stbi__fill_bits(a);
-			b = z->fast[a->code_buffer & ((1 << 9) - 1)];
-			if (b != 0)
-			{
-				s = b >> 9;
-				a->code_buffer >>= s;
-				a->num_bits -= s;
-				return b & 511;
-			}
-
-			return stbi__zhuffman_decode_slowpath(a, z);
-		}
-
-		public int stbi__zexpand(stbi__zbuf* z, sbyte* zout, int n)
-		{
-			sbyte* q;
-			int cur;
-			int limit;
-			int old_limit;
-			z->zout = zout;
-			if (z->z_expandable == 0)
-				throw new Exception("output buffer limit");
-			cur = (int)(z->zout - z->zout_start);
-			limit = old_limit = (int)(z->zout_end - z->zout_start);
-			while ((cur + n) > limit)
-			{
-				limit *= 2;
-			}
-
-			q = (sbyte*)CRuntime.realloc(z->zout_start, (ulong)limit);
-			if (q == null)
-				throw new Exception("outofmem");
-			z->zout_start = q;
-			z->zout = q + cur;
-			z->zout_end = q + limit;
-			return 1;
-		}
-
-		public int stbi__parse_huffman_block(stbi__zbuf* a)
-		{
-			sbyte* zout = a->zout;
-			for (; ; )
-			{
-				int z = stbi__zhuffman_decode(a, &a->z_length);
-				if (z < 256)
-				{
-					if (z < 0)
-						throw new Exception("bad huffman code");
-					if (zout >= a->zout_end)
-					{
-						if (stbi__zexpand(a, zout, 1) == 0)
-							return 0;
-						zout = a->zout;
-					}
-
-					*zout++ = (sbyte)z;
-				}
-				else
-				{
-					byte* p;
-					int len;
-					int dist;
-					if (z == 256)
-					{
-						a->zout = zout;
-						return 1;
-					}
-
-					z -= 257;
-					len = stbi__zlength_base[z];
-					if (stbi__zlength_extra[z] != 0)
-						len += (int)stbi__zreceive(a, stbi__zlength_extra[z]);
-					z = stbi__zhuffman_decode(a, &a->z_distance);
-					if (z < 0)
-						throw new Exception("bad huffman code");
-					dist = stbi__zdist_base[z];
-					if (stbi__zdist_extra[z] != 0)
-						dist += (int)stbi__zreceive(a, stbi__zdist_extra[z]);
-					if ((zout - a->zout_start) < dist)
-						throw new Exception("bad dist");
-					if ((zout + len) > a->zout_end)
-					{
-						if (stbi__zexpand(a, zout, len) == 0)
-							return 0;
-						zout = a->zout;
-					}
-
-					p = (byte*)(zout - dist);
-					if (dist == 1)
-					{
-						byte v = *p;
-						if (len != 0)
-						{
-							do
-								*zout++ = (sbyte)v;
-							while ((--len) != 0);
-						}
-					}
-					else
-					{
-						if (len != 0)
-						{
-							do
-								*zout++ = (sbyte)*p++;
-							while ((--len) != 0);
-						}
-					}
-				}
-			}
-		}
-
-		public int stbi__compute_huffman_codes(stbi__zbuf* a)
-		{
-			stbi__zhuffman z_codelength = new stbi__zhuffman();
-			byte* lencodes = stackalloc byte[286 + 32 + 137];
-			byte* codelength_sizes = stackalloc byte[19];
-			int i;
-			int n;
-			int hlit = (int)(stbi__zreceive(a, 5) + 257);
-			int hdist = (int)(stbi__zreceive(a, 5) + 1);
-			int hclen = (int)(stbi__zreceive(a, 4) + 4);
-			int ntot = hlit + hdist;
-			CRuntime.memset(codelength_sizes, 0, (ulong)(19 * sizeof(byte)));
-			for (i = 0; i < hclen; ++i)
-			{
-				int s = (int)stbi__zreceive(a, 3);
-				codelength_sizes[length_dezigzag[i]] = (byte)s;
-			}
-
-			if (ZbuildHuffman(&z_codelength, codelength_sizes, 19) == 0)
-				return 0;
-			n = 0;
-			while (n < ntot)
-			{
-				int c = stbi__zhuffman_decode(a, &z_codelength);
-				if ((c < 0) || (c >= 19))
-					throw new Exception("bad codelengths");
-				if (c < 16)
-					lencodes[n++] = (byte)c;
-				else
-				{
-					byte fill = 0;
-					if (c == 16)
-					{
-						c = (int)(stbi__zreceive(a, 2) + 3);
-						if (n == 0)
-							throw new Exception("bad codelengths");
-						fill = lencodes[n - 1];
-					}
-					else if (c == 17)
-						c = (int)(stbi__zreceive(a, 3) + 3);
-					else
-					{
-						c = (int)(stbi__zreceive(a, 7) + 11);
-					}
-
-					if ((ntot - n) < c)
-						throw new Exception("bad codelengths");
-					CRuntime.memset(lencodes + n, fill, (ulong)c);
-					n += c;
-				}
-			}
-
-			if (n != ntot)
-				throw new Exception("bad codelengths");
-			if (ZbuildHuffman(&a->z_length, lencodes, hlit) == 0)
-				return 0;
-			if (ZbuildHuffman(&a->z_distance, lencodes + hlit, hdist) == 0)
-				return 0;
-			return 1;
-		}
-
-		public int stbi__parse_uncompressed_block(stbi__zbuf* a)
-		{
-			byte* header = stackalloc byte[4];
-			int len;
-			int nlen;
-			int k;
-			if ((a->num_bits & 7) != 0)
-				stbi__zreceive(a, a->num_bits & 7);
-			k = 0;
-			while (a->num_bits > 0)
-			{
-				header[k++] = (byte)(a->code_buffer & 255);
-				a->code_buffer >>= 8;
-				a->num_bits -= 8;
-			}
-
-			while (k < 4)
-			{
-				header[k++] = stbi__zget8(a);
-			}
-
-			len = header[1] * 256 + header[0];
-			nlen = header[3] * 256 + header[2];
-			if (nlen != (len ^ 0xffff))
-				throw new Exception("zlib corrupt");
-			if ((a->zbuffer + len) > a->zbuffer_end)
-				throw new Exception("read past buffer");
-			if ((a->zout + len) > a->zout_end)
-				if (stbi__zexpand(a, a->zout, len) == 0)
-					return 0;
-			CRuntime.memcpy(a->zout, a->zbuffer, (ulong)len);
-			a->zbuffer += len;
-			a->zout += len;
-			return 1;
-		}
-
-		public int stbi__parse_zlib_header(stbi__zbuf* a)
-		{
-			int cmf = stbi__zget8(a);
-			int cm = cmf & 15;
-			int flg = stbi__zget8(a);
-			if ((cmf * 256 + flg) % 31 != 0)
-				throw new Exception("bad zlib header");
-			if ((flg & 32) != 0)
-				throw new Exception("no preset dict");
-			if (cm != 8)
-				throw new Exception("bad compression");
-			return 1;
-		}
-
-		public int stbi__parse_zlib(stbi__zbuf* a, int parse_header)
-		{
-			int final;
-			int type;
-			if (parse_header != 0)
-				if (stbi__parse_zlib_header(a) == 0)
-					return 0;
-			a->num_bits = 0;
-			a->code_buffer = 0;
-			do
-			{
-				final = (int)stbi__zreceive(a, 1);
-				type = (int)stbi__zreceive(a, 2);
-				if (type == 0)
-				{
-					if (stbi__parse_uncompressed_block(a) == 0)
-						return 0;
-				}
-				else if (type == 3)
-				{
-					return 0;
-				}
-				else
-				{
-					if (type == 1)
-					{
-						fixed (byte* b = stbi__zdefault_length)
-						{
-							if (ZbuildHuffman(&a->z_length, b, 288) == 0)
-								return 0;
-						}
-
-						fixed (byte* b = stbi__zdefault_distance)
-						{
-							if (ZbuildHuffman(&a->z_distance, b, 32) == 0)
-								return 0;
-						}
-					}
-					else
-					{
-						if (stbi__compute_huffman_codes(a) == 0)
-							return 0;
-					}
-
-					if (stbi__parse_huffman_block(a) == 0)
-						return 0;
-				}
-			} while (final == 0);
-
-			return 1;
-		}
-
-		public int stbi__do_zlib(stbi__zbuf* a, sbyte* obuf, int olen, int exp, int parse_header)
-		{
-			a->zout_start = obuf;
-			a->zout = obuf;
-			a->zout_end = obuf + olen;
-			a->z_expandable = exp;
-			return stbi__parse_zlib(a, parse_header);
-		}
-
-		public sbyte* stbi_zlib_decode_malloc_guesssize(sbyte* buffer, int len, int initial_size, int* outlen)
-		{
-			stbi__zbuf a = new stbi__zbuf();
-			sbyte* p = (sbyte*)CRuntime.malloc((ulong)initial_size);
-			if (p == null)
-				return null;
-			a.zbuffer = (byte*)buffer;
-			a.zbuffer_end = (byte*)buffer + len;
-			if (stbi__do_zlib(&a, p, initial_size, 1, 1) != 0)
-			{
-				if (outlen != null)
-					*outlen = (int)(a.zout - a.zout_start);
-				return a.zout_start;
-			}
-			else
-			{
-				CRuntime.free(a.zout_start);
-				return null;
-			}
-
-		}
-
-		public sbyte* stbi_zlib_decode_malloc(sbyte* buffer, int len, int* outlen)
-		{
-			return stbi_zlib_decode_malloc_guesssize(buffer, len, 16384, outlen);
-		}
-
-		public sbyte* stbi_zlib_decode_malloc_guesssize_headerflag(sbyte* buffer, int len, int initial_size,
-			int* outlen, int parse_header)
-		{
-			stbi__zbuf a = new stbi__zbuf();
-			sbyte* p = (sbyte*)CRuntime.malloc((ulong)initial_size);
-			if (p == null)
-				return null;
-			a.zbuffer = (byte*)buffer;
-			a.zbuffer_end = (byte*)buffer + len;
-			if (stbi__do_zlib(&a, p, initial_size, 1, parse_header) != 0)
-			{
-				if (outlen != null)
-					*outlen = (int)(a.zout - a.zout_start);
-				return a.zout_start;
-			}
-			else
-			{
-				CRuntime.free(a.zout_start);
-				return null;
-			}
-
-		}
-
-		public int stbi_zlib_decode_buffer(sbyte* obuffer, int olen, sbyte* ibuffer, int ilen)
-		{
-			stbi__zbuf a = new stbi__zbuf();
-			a.zbuffer = (byte*)ibuffer;
-			a.zbuffer_end = (byte*)ibuffer + ilen;
-			if (stbi__do_zlib(&a, obuffer, olen, 0, 1) != 0)
-				return (int)(a.zout - a.zout_start);
-			else
-				return -1;
-		}
-
-		public sbyte* stbi_zlib_decode_noheader_malloc(sbyte* buffer, int len, int* outlen)
-		{
-			stbi__zbuf a = new stbi__zbuf();
-			sbyte* p = (sbyte*)CRuntime.malloc((ulong)16384);
-			if (p == null)
-				return null;
-			a.zbuffer = (byte*)buffer;
-			a.zbuffer_end = (byte*)buffer + len;
-			if (stbi__do_zlib(&a, p, 16384, 1, 0) != 0)
-			{
-				if (outlen != null)
-					*outlen = (int)(a.zout - a.zout_start);
-				return a.zout_start;
-			}
-			else
-			{
-				CRuntime.free(a.zout_start);
-				return null;
-			}
-
-		}
-
-		public int stbi_zlib_decode_noheader_buffer(sbyte* obuffer, int olen, sbyte* ibuffer, int ilen)
-		{
-			stbi__zbuf a = new stbi__zbuf();
-			a.zbuffer = (byte*)ibuffer;
-			a.zbuffer_end = (byte*)ibuffer + ilen;
-			if (stbi__do_zlib(&a, obuffer, olen, 0, 0) != 0)
-				return (int)(a.zout - a.zout_start);
-			else
-				return -1;
-		}
-
-		public stbi__pngchunk Get_chunk_header()
-		{
-			stbi__pngchunk c = new stbi__pngchunk();
+			PngChunk c = new PngChunk();
 			c.length = Context.Get32BigEndian();
 			c.type = Context.Get32BigEndian();
 			return c;
 		}
 
-		public int stbi__check_png_header()
+		public void CheckPngHeader()
 		{
-			int i;
-			for (i = 0; i < 8; ++i)
+			for (var i = 0; i < 8; ++i)
 			{
-				if (Context.Get8() != png_sig[i])
+				if (Context.Get8() != PngSignature[i])
 					throw new Exception("bad png sig");
 			}
-
-			return 1;
 		}
 
-		public int stbi__paeth(int a, int b, int c)
+		public int Paeth(int a, int b, int c)
 		{
 			int p = a + b - c;
 			int pa = CRuntime.abs(p - a);
@@ -638,7 +74,7 @@ namespace StbImageSharp
 			return c;
 		}
 
-		public int stbi__create_png_image_raw(byte* raw, uint raw_len, int out_n, uint x, uint y, int depth, int color)
+		public int CreatePngImageRaw(byte* raw, uint raw_len, int out_n, uint x, uint y, int depth, int color)
 		{
 			int bytes = depth == 16 ? 2 : 1;
 			uint i;
@@ -674,30 +110,30 @@ namespace StbImageSharp
 
 				prior = cur - stride;
 				if (j == 0)
-					filter = first_row_filter[filter];
+					filter = (int)FirstRowFilter[filter];
 				for (k = 0; k < filter_bytes; ++k)
 				{
-					switch (filter)
+					switch ((F)filter)
 					{
-						case STBI__F_none:
+						case F.none:
 							cur[k] = raw[k];
 							break;
-						case STBI__F_sub:
+						case F.sub:
 							cur[k] = raw[k];
 							break;
-						case STBI__F_up:
+						case F.up:
 							cur[k] = (byte)((raw[k] + prior[k]) & 255);
 							break;
-						case STBI__F_avg:
+						case F.avg:
 							cur[k] = (byte)((raw[k] + (prior[k] >> 1)) & 255);
 							break;
-						case STBI__F_paeth:
-							cur[k] = (byte)((raw[k] + stbi__paeth(0, prior[k], 0)) & 255);
+						case F.paeth:
+							cur[k] = (byte)((raw[k] + Paeth(0, prior[k], 0)) & 255);
 							break;
-						case STBI__F_avg_first:
+						case F.avg_first:
 							cur[k] = raw[k];
 							break;
-						case STBI__F_paeth_first:
+						case F.paeth_first:
 							cur[k] = raw[k];
 							break;
 					}
@@ -733,54 +169,54 @@ namespace StbImageSharp
 				if ((depth < 8) || (img_n == out_n))
 				{
 					int nk = (width - 1) * filter_bytes;
-					switch (filter)
+					switch ((F)filter)
 					{
-						case STBI__F_none:
+						case F.none:
 							CRuntime.memcpy(cur, raw, (ulong)nk);
 							break;
-						case STBI__F_sub:
+						case F.sub:
 							for (k = 0; k < nk; ++k)
 							{
 								cur[k] = (byte)((raw[k] + cur[k - filter_bytes]) & 255);
 							}
 
 							break;
-						case STBI__F_up:
+						case F.up:
 							for (k = 0; k < nk; ++k)
 							{
 								cur[k] = (byte)((raw[k] + prior[k]) & 255);
 							}
 
 							break;
-						case STBI__F_avg:
+						case F.avg:
 							for (k = 0; k < nk; ++k)
 							{
 								cur[k] = (byte)((raw[k] + ((prior[k] + cur[k - filter_bytes]) >> 1)) & 255);
 							}
 
 							break;
-						case STBI__F_paeth:
+						case F.paeth:
 							for (k = 0; k < nk; ++k)
 							{
 								cur[k] =
 									(byte)
-										((raw[k] + stbi__paeth(cur[k - filter_bytes], prior[k],
+										((raw[k] + Paeth(cur[k - filter_bytes], prior[k],
 											  prior[k - filter_bytes])) &
 										 255);
 							}
 
 							break;
-						case STBI__F_avg_first:
+						case F.avg_first:
 							for (k = 0; k < nk; ++k)
 							{
 								cur[k] = (byte)((raw[k] + (cur[k - filter_bytes] >> 1)) & 255);
 							}
 
 							break;
-						case STBI__F_paeth_first:
+						case F.paeth_first:
 							for (k = 0; k < nk; ++k)
 							{
-								cur[k] = (byte)((raw[k] + stbi__paeth(cur[k - filter_bytes], 0,
+								cur[k] = (byte)((raw[k] + Paeth(cur[k - filter_bytes], 0,
 													   0)) & 255);
 							}
 
@@ -791,9 +227,9 @@ namespace StbImageSharp
 				}
 				else
 				{
-					switch (filter)
+					switch ((F)filter)
 					{
-						case STBI__F_none:
+						case F.none:
 							for (i = x - 1;
 								i >= 1;
 								--i, cur[filter_bytes] = 255, raw += filter_bytes, cur += output_bytes,
@@ -806,7 +242,7 @@ namespace StbImageSharp
 							}
 
 							break;
-						case STBI__F_sub:
+						case F.sub:
 							for (i = x - 1;
 								i >= 1;
 								--i, cur[filter_bytes] = 255, raw += filter_bytes, cur += output_bytes,
@@ -819,7 +255,7 @@ namespace StbImageSharp
 							}
 
 							break;
-						case STBI__F_up:
+						case F.up:
 							for (i = x - 1;
 								i >= 1;
 								--i, cur[filter_bytes] = 255, raw += filter_bytes, cur += output_bytes,
@@ -832,7 +268,7 @@ namespace StbImageSharp
 							}
 
 							break;
-						case STBI__F_avg:
+						case F.avg:
 							for (i = x - 1;
 								i >= 1;
 								--i, cur[filter_bytes] = 255, raw += filter_bytes, cur += output_bytes,
@@ -845,7 +281,7 @@ namespace StbImageSharp
 							}
 
 							break;
-						case STBI__F_paeth:
+						case F.paeth:
 							for (i = x - 1;
 								i >= 1;
 								--i, cur[filter_bytes] = 255, raw += filter_bytes, cur += output_bytes,
@@ -855,14 +291,14 @@ namespace StbImageSharp
 								{
 									cur[k] =
 										(byte)
-											((raw[k] + stbi__paeth(cur[k - output_bytes], prior[k],
+											((raw[k] + Paeth(cur[k - output_bytes], prior[k],
 												  prior[k - output_bytes])) &
 											 255);
 								}
 							}
 
 							break;
-						case STBI__F_avg_first:
+						case F.avg_first:
 							for (i = x - 1;
 								i >= 1;
 								--i, cur[filter_bytes] = 255, raw += filter_bytes, cur += output_bytes,
@@ -875,7 +311,7 @@ namespace StbImageSharp
 							}
 
 							break;
-						case STBI__F_paeth_first:
+						case F.paeth_first:
 							for (i = x - 1;
 								i >= 1;
 								--i, cur[filter_bytes] = 255, raw += filter_bytes, cur += output_bytes,
@@ -883,7 +319,7 @@ namespace StbImageSharp
 							{
 								for (k = 0; k < filter_bytes; ++k)
 								{
-									cur[k] = (byte)((raw[k] + stbi__paeth(cur[k - output_bytes], 0,
+									cur[k] = (byte)((raw[k] + Paeth(cur[k - output_bytes], 0,
 														   0)) & 255);
 								}
 							}
@@ -908,7 +344,7 @@ namespace StbImageSharp
 				{
 					byte* cur = _out_ + stride * j;
 					byte* _in_ = _out_ + stride * j + x * out_n - img_width_bytes;
-					byte scale = (byte)((color == 0) ? stbi__depth_scale_table[depth] : 1);
+					byte scale = (byte)((color == 0) ? DepthScaleTable[depth] : 1);
 					if (depth == 4)
 					{
 						for (k = (int)(x * img_n); k >= 2; k -= 2, ++_in_)
@@ -1005,7 +441,7 @@ namespace StbImageSharp
 			return 1;
 		}
 
-		public int stbi__create_png_image(byte* image_data, uint image_data_len, int out_n,
+		public int CreatePngImage(byte* image_data, uint image_data_len, int out_n,
 			int depth, int color, int interlaced)
 		{
 			int bytes = depth == 16 ? 2 : 1;
@@ -1014,7 +450,7 @@ namespace StbImageSharp
 			int p;
 			if (interlaced == 0)
 			{
-				return stbi__create_png_image_raw(image_data, image_data_len, out_n,
+				return CreatePngImageRaw(image_data, image_data_len, out_n,
 						(uint)Context.img_x,
 						(uint)Context.img_y, depth, color);
 			}
@@ -1061,9 +497,9 @@ namespace StbImageSharp
 				y = (Context.img_y - yorig[p] + yspc[p] - 1) / yspc[p];
 				if ((x != 0) && (y != 0))
 				{
-					uint img_len = (uint)(((((Context.img_n * x * depth) + 7) >> 3) + 1) * y);
+					uint img_len = (uint)((((((int)Context.img_n * x * depth) + 7) >> 3) + 1) * y);
 					if (
-						stbi__create_png_image_raw(image_data, image_data_len, out_n, (uint)x,
+						CreatePngImageRaw(image_data, image_data_len, out_n, (uint)x,
 							(uint)y,
 							depth, color) == 0)
 					{
@@ -1093,7 +529,7 @@ namespace StbImageSharp
 			return 1;
 		}
 
-		public int stbi__compute_transparency(byte* tc, int out_n)
+		public int ComputeTransparency(byte* tc, int out_n)
 		{
 			uint i;
 			uint pixel_count = (uint)(Context.img_x * Context.img_y);
@@ -1119,7 +555,7 @@ namespace StbImageSharp
 			return 1;
 		}
 
-		public int stbi__compute_transparency16(ushort* tc, int out_n)
+		public int ComputeTransparency16(ushort* tc, int out_n)
 		{
 			uint i;
 			uint pixel_count = (uint)(Context.img_x * Context.img_y);
@@ -1145,7 +581,7 @@ namespace StbImageSharp
 			return 1;
 		}
 
-		public int stbi__expand_png_palette(byte* palette, int len, int pal_img_n)
+		public int ExpandPngPalette(byte* palette, int len, int pal_img_n)
 		{
 			uint i;
 			uint pixel_count = (uint)(Context.img_x * Context.img_y);
@@ -1195,7 +631,7 @@ namespace StbImageSharp
 			stbi__de_iphone_flag = flag_true_if_should_convert;
 		}
 
-		public void stbi__de_iphone()
+		public void DeIphone()
 		{
 			uint i;
 			uint pixel_count = (uint)(Context.img_x * Context.img_y);
@@ -1247,7 +683,7 @@ namespace StbImageSharp
 			}
 		}
 
-		public int stbi__parse_png_file(ScanType scan, ColorComponents req_comp)
+		public int ParsePngFile(ScanType scan, ColorComponents req_comp)
 		{
 			byte* palette = stackalloc byte[1024];
 			byte pal_img_n = 0;
@@ -1263,16 +699,16 @@ namespace StbImageSharp
 			int interlace = 0;
 			int color = 0;
 			int is_iphone = 0;
-			expanded = null;
-			idata = null;
+			_expanded = null;
+			_idata = null;
 			_out_ = null;
-			if (stbi__check_png_header() == 0)
-				return 0;
+			CheckPngHeader();
+
 			if (scan == ScanType.Type)
 				return 1;
 			for (; ; )
 			{
-				stbi__pngchunk c = Get_chunk_header();
+				PngChunk c = GetChunkHeader();
 				switch (c.type)
 				{
 					case (('C') << 24) + (('g') << 16) + (('B') << 8) + 'I':
@@ -1294,14 +730,14 @@ namespace StbImageSharp
 						Context.img_y = (int)Context.Get32BigEndian();
 						if (Context.img_y > (1 << 24))
 							throw new Exception("too large");
-						depth = Context.Get8();
-						if ((depth != 1) && (depth != 2) && (depth != 4) && (depth != 8) &&
-							(depth != 16))
+						_depth = Context.Get8();
+						if ((_depth != 1) && (_depth != 2) && (_depth != 4) && (_depth != 8) &&
+							(_depth != 16))
 							throw new Exception("1/2/4/8/16-bit only");
 						color = Context.Get8();
 						if (color > 6)
 							throw new Exception("bad ctype");
-						if ((color == 3) && (depth == 16))
+						if ((color == 3) && (_depth == 16))
 							throw new Exception("bad ctype");
 						if (color == 3)
 							pal_img_n = 3;
@@ -1358,7 +794,7 @@ namespace StbImageSharp
 					{
 						if (first != 0)
 							throw new Exception("first not IHDR");
-						if (idata != null)
+						if (_idata != null)
 							throw new Exception("tRNS after IDAT");
 						if (pal_img_n != 0)
 						{
@@ -1385,7 +821,7 @@ namespace StbImageSharp
 							if (c.length != (uint)Context.img_n * 2)
 								throw new Exception("bad tRNS len");
 							has_trans = 1;
-							if (depth == 16)
+							if (_depth == 16)
 							{
 								for (k = 0; k < Context.img_n; ++k)
 								{
@@ -1396,7 +832,7 @@ namespace StbImageSharp
 							{
 								for (k = 0; k < Context.img_n; ++k)
 								{
-									tc[k] = (byte)((byte)(Context.Get16BigEndian() & 255) * stbi__depth_scale_table[depth]);
+									tc[k] = (byte)((byte)(Context.Get16BigEndian() & 255) * DepthScaleTable[_depth]);
 								}
 							}
 						}
@@ -1428,13 +864,13 @@ namespace StbImageSharp
 								idata_limit *= 2;
 							}
 
-							p = (byte*)CRuntime.realloc(idata, (ulong)idata_limit);
+							p = (byte*)CRuntime.realloc(_idata, (ulong)idata_limit);
 							if (p == null)
 								throw new Exception("outofmem");
-							idata = p;
+							_idata = p;
 						}
 
-						if (Getn(s, idata + ioff, (int)c.length) == 0)
+						if (!Context.Getn(_idata + ioff, (int)c.length))
 							throw new Exception("outofdata");
 						ioff += c.length;
 						break;
@@ -1447,52 +883,51 @@ namespace StbImageSharp
 							throw new Exception("first not IHDR");
 						if (scan != ScanType.Load)
 							return 1;
-						if (idata == null)
+						if (_idata == null)
 							throw new Exception("no IDAT");
-						bpl = (uint)((Context.img_x * depth + 7) / 8);
+						bpl = (uint)((Context.img_x * _depth + 7) / 8);
 						raw_len = (uint)(bpl * Context.img_y * Context.img_n + Context.img_y);
-						expanded =
-							(byte*)
-							stbi_zlib_decode_malloc_guesssize_headerflag((sbyte*)idata, (int)ioff,
+						_expanded =
+							(byte*)ZBuffer.ZlibDecodeMallocGuessSizeHeaderFlag((sbyte*)_idata, (int)ioff,
 								(int)raw_len,
 								(int*)&raw_len, is_iphone != 0 ? 0 : 1);
-						if (expanded == null)
+						if (_expanded == null)
 							return 0;
-						CRuntime.free(idata);
-						idata = null;
+						CRuntime.free(_idata);
+						_idata = null;
 						if ((((int)req_comp == (Context.img_n + 1)) && (req_comp != ColorComponents.RedGreenBlue) && (pal_img_n == 0)) ||
 							(has_trans != 0))
 							Context.img_out_n = Context.img_n + 1;
 						else
 							Context.img_out_n = Context.img_n;
 						if (
-							stbi__create_png_image(expanded, (uint)raw_len, (int)Context.img_out_n,
-								(int)depth, (int)color,
+							CreatePngImage(_expanded, (uint)raw_len, (int)Context.img_out_n,
+								(int)_depth, (int)color,
 								(int)interlace) == 0)
 							return 0;
 						if (has_trans != 0)
 						{
-							if (depth == 16)
+							if (_depth == 16)
 							{
-								if (stbi__compute_transparency16(tc16, Context.img_out_n) == 0)
+								if (ComputeTransparency16(tc16, Context.img_out_n) == 0)
 									return 0;
 							}
 							else
 							{
-								if (stbi__compute_transparency(tc, Context.img_out_n) == 0)
+								if (ComputeTransparency(tc, Context.img_out_n) == 0)
 									return 0;
 							}
 						}
 
 						if ((is_iphone != 0) && (stbi__de_iphone_flag != 0) && (Context.img_out_n > 2))
-							stbi__de_iphone(z);
+							DeIphone();
 						if (pal_img_n != 0)
 						{
 							Context.img_n = pal_img_n;
 							Context.img_out_n = pal_img_n;
 							if ((int)req_comp >= 3)
 								Context.img_out_n = (int)req_comp;
-							if (stbi__expand_png_palette(palette, (int)pal_len, (int)Context.img_out_n) == 0)
+							if (ExpandPngPalette(palette, (int)pal_len, (int)Context.img_out_n) == 0)
 								return 0;
 						}
 						else if (has_trans != 0)
@@ -1500,8 +935,8 @@ namespace StbImageSharp
 							++Context.img_n;
 						}
 
-						CRuntime.free(expanded);
-						expanded = null;
+						CRuntime.free(_expanded);
+						_expanded = null;
 						return 1;
 					}
 					default:
@@ -1509,8 +944,7 @@ namespace StbImageSharp
 							throw new Exception("first not IHDR");
 						if ((c.type & (1 << 29)) == 0)
 						{
-							string invalid_chunk = "XXXX PNG chunk not known";
-							throw new Exception(invalid_chunk);
+							throw new Exception("XXXX PNG chunk not known");
 						}
 
 						Context.Skip((int)c.length);
@@ -1521,84 +955,74 @@ namespace StbImageSharp
 			}
 		}
 
-		public byte* stbi__do_png(int* x, int* y, int* n, ColorComponents req_comp)
+		protected override unsafe byte* InternalLoad(ColorComponents comp, ref int width, ref int height, ref ColorComponents sourceComp, ref int bitsPerChannel)
 		{
 			byte* result = null;
-			if (stbi__parse_png_file(p, (int)ScanType.Load, (int)req_comp) != 0)
+
+			if (ParsePngFile((int)ScanType.Load, comp) != 0)
 			{
-				if (p.depth < 8)
-					ri->bits_per_channel = 8;
+				if (_depth < 8)
+					bitsPerChannel = 8;
 				else
-					ri->bits_per_channel = (int)p.depth;
-				result = p._out_;
-				p._out_ = null;
-				if ((req_comp != 0) && (req_comp != Context.img_out_n))
+					bitsPerChannel = _depth;
+				result = _out_;
+				_out_ = null;
+				if ((comp != ColorComponents.Default) && ((int)comp != Context.img_out_n))
 				{
-					if (ri->bits_per_channel == 8)
-						result = stbi__convert_format((byte*)result, (int)Context.img_out_n, req_comp,
+					if (bitsPerChannel == 8)
+						result = Utility.ConvertFormat(result, Context.img_out_n, (int)comp,
 							(uint)Context.img_x,
 							(uint)Context.img_y);
 					else
-						result = stbi__convert_format16((ushort*)result, (int)Context.img_out_n, req_comp,
+						result = (byte *)Utility.ConvertFormat16((ushort*)result, 
+							Context.img_out_n, (int)comp,
 							(uint)Context.img_x,
 							(uint)Context.img_y);
-					Context.img_out_n = req_comp;
+					Context.img_out_n = (int)comp;
 					if (result == null)
 						return result;
 				}
 
-				*x = (int)Context.img_x;
-				*y = (int)Context.img_y;
-				if (n != null)
-					*n = (int)Context.img_n;
+				width = Context.img_x;
+				height = Context.img_y;
+				sourceComp = (ColorComponents)Context.img_n;
 			}
 
-			CRuntime.free(p._out_);
-			p._out_ = null;
-			CRuntime.free(p.expanded);
-			p.expanded = null;
-			CRuntime.free(p.idata);
-			p.idata = null;
+			CRuntime.free(_out_);
+			_out_ = null;
+			CRuntime.free(_expanded);
+			_expanded = null;
+			CRuntime.free(_idata);
+			_idata = null;
 			return result;
 		}
 
-		public void* stbi__png_load(int* x, int* y, ColorComponents* comp, ColorComponents req_comp, stbi__result_info* ri)
+		protected override unsafe bool InternalInfo(ref int width, ref int height, ref ColorComponents sourceComp)
 		{
-			stbi__png p = new stbi__png();
-			p.s = s;
-			return stbi__do_png(p, x, y, comp, (int)req_comp, ri);
-		}
-
-		public int stbi__png_test()
-		{
-			int r;
-			r = stbi__check_png_header();
-			stbi__rewind();
-			return r;
-		}
-
-		public int stbi__png_info_raw(stbi__png p, int* x, int* y, ColorComponents* comp)
-		{
-			if (stbi__parse_png_file(p, (int)ScanType.Header, 0) == 0)
+			if (ParsePngFile(ScanType.Header, 0) == 0)
 			{
-				stbi__rewind(p.s);
-				return 0;
+				Context.Rewind();
+				return false;
 			}
 
-			if (x != null)
-				*x = (int)Context.img_x;
-			if (y != null)
-				*y = (int)Context.img_y;
-			if (comp != null)
-				*comp = (int)Context.img_n;
-			return 1;
+			width = Context.img_x;
+			height = Context.img_y;
+			sourceComp = (ColorComponents)Context.img_n;
+			return true;
 		}
 
-		public int stbi__png_info(int* x, int* y, ColorComponents* comp)
+		protected override bool InternalTest()
 		{
-			stbi__png p = new stbi__png();
-			p.s = s;
-			return stbi__png_info_raw(p, x, y, comp);
+			try
+			{
+				CheckPngHeader();
+			}
+			catch (Exception)
+			{
+				return false;
+			}
+
+			return true;
 		}
 	}
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Runtime.InteropServices;
 
 namespace StbImageSharp
 {
@@ -11,6 +12,7 @@ namespace StbImageSharp
 		public int img_out_n;
 		public Stream stream;
 		private long _initialPosition;
+		private byte[] _internalBuffer = new byte[256];
 
 		public DecodingContext(Stream str)
 		{
@@ -23,9 +25,9 @@ namespace StbImageSharp
 			_initialPosition = str.Position;
 		}
 
-		public int Get8()
+		public byte Get8()
 		{
-			return stream.ReadByte();
+			return (byte)stream.ReadByte();
 		}
 
 		public int Get16BigEndian()
@@ -50,6 +52,20 @@ namespace StbImageSharp
 		{
 			uint z = (uint)Get16LittleEndian();
 			return (uint)(z + (Get16LittleEndian() << 16));
+		}
+
+		public unsafe bool Getn(byte *buffer, int n)
+		{
+			if (n > _internalBuffer.Length)
+			{
+				_internalBuffer = new byte[n * 2];
+			}
+
+			var cnt = stream.Read(_internalBuffer, 0, n);
+
+			Marshal.Copy(_internalBuffer, 0, new IntPtr(buffer), cnt);
+
+			return cnt == n;
 		}
 
 		public void Rewind()

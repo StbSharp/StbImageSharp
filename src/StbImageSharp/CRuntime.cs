@@ -20,6 +20,8 @@ namespace StbImageSharp
 		{
 			var ptr = Marshal.AllocHGlobal((int) size);
 
+			Memory.Allocated();
+
 			return ptr.ToPointer();
 		}
 
@@ -97,8 +99,14 @@ namespace StbImageSharp
 
 		public static void free(void* a)
 		{
+			if (a == null)
+			{
+				return;
+			}
+
 			var ptr = new IntPtr(a);
 			Marshal.FreeHGlobal(ptr);
+			Memory.Freed();
 		}
 
 		public static void memset(void* ptr, int value, long size)

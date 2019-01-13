@@ -558,7 +558,7 @@ namespace StbImageSharp
 			return 1;
 		}
 
-		public byte stbi__clamp(int x)
+		public static byte Clamp(int x)
 		{
 			if (((uint)x) > 255)
 			{
@@ -571,7 +571,7 @@ namespace StbImageSharp
 			return (byte)x;
 		}
 
-		public void stbi__idct_block(byte* _out_, int out_stride, short* data)
+		public void IdctBlock(byte* _out_, int out_stride, short* data)
 		{
 			int i;
 			int* val = stackalloc int[64];
@@ -708,14 +708,14 @@ namespace StbImageSharp
 				x1 += 65536 + (128 << 17);
 				x2 += 65536 + (128 << 17);
 				x3 += 65536 + (128 << 17);
-				o[0] = stbi__clamp((x0 + t3) >> 17);
-				o[7] = stbi__clamp((x0 - t3) >> 17);
-				o[1] = stbi__clamp((x1 + t2) >> 17);
-				o[6] = stbi__clamp((x1 - t2) >> 17);
-				o[2] = stbi__clamp((x2 + t1) >> 17);
-				o[5] = stbi__clamp((x2 - t1) >> 17);
-				o[3] = stbi__clamp((x3 + t0) >> 17);
-				o[4] = stbi__clamp((x3 - t0) >> 17);
+				o[0] = Clamp((x0 + t3) >> 17);
+				o[7] = Clamp((x0 - t3) >> 17);
+				o[1] = Clamp((x1 + t2) >> 17);
+				o[6] = Clamp((x1 - t2) >> 17);
+				o[2] = Clamp((x2 + t1) >> 17);
+				o[5] = Clamp((x2 - t1) >> 17);
+				o[3] = Clamp((x3 + t0) >> 17);
+				o[4] = Clamp((x3 - t0) >> 17);
 			}
 		}
 
@@ -938,7 +938,7 @@ namespace StbImageSharp
 				int i;
 				int j;
 				int n;
-				for (n = 0; n < Context.img_n; ++n)
+				for (n = 0; n < (int)Context.img_n; ++n)
 				{
 					int w = (img_comp[n].x + 7) >> 3;
 					int h = (img_comp[n].y + 7) >> 3;
@@ -1510,7 +1510,7 @@ namespace StbImageSharp
 
 		public void Setup()
 		{
-			idct_block_kernel = stbi__idct_block;
+			idct_block_kernel = IdctBlock;
 			YCbCr_to_RGB_kernel = YCbCrToRGBRow;
 			resampleRow_hv_2_kernel = ResampleRowHV2;
 		}
@@ -1526,7 +1526,7 @@ namespace StbImageSharp
 			return (byte)((t + (t >> 8)) >> 8);
 		}
 
-		public byte* InternalLoad(int* out_x, int* out_y, ColorComponents* comp, ColorComponents req_comp)
+		public byte* InternalLoad(ref int out_x, ref int out_y, ref ColorComponents comp, ColorComponents req_comp)
 		{
 			int n;
 			int decode_n;
@@ -1733,32 +1733,39 @@ namespace StbImageSharp
 				}
 
 				Cleanup();
-				*out_x = Context.img_x;
-				*out_y = Context.img_y;
-				if (comp != null)
-				{
-					*comp = (ColorComponents)(Context.img_n >= 3 ? 3 : 1);
-				}
+				out_x = Context.img_x;
+				out_y = Context.img_y;
+				comp = (ColorComponents)(Context.img_n >= 3 ? 3 : 1);
 				return output;
 			}
 		}
 
-		protected override byte* InternalLoad(ColorComponents comp, int* width, int* height, ColorComponents* sourceComp)
+		protected override unsafe byte* InternalLoad(ColorComponents req_comp, ref int x, ref int y, ref ColorComponents sourceComp, ref int bitsPerChannel)
 		{
 			Setup();
 
-			return InternalLoad(width, height, sourceComp, comp);
+			return InternalLoad(ref x, ref y, ref sourceComp, req_comp);
 		}
 
 		protected override bool InternalTest()
 		{
 			Setup();
-			var r = DecodeHeader(ScanType.Type);
+
+			bool r;
+
+			try
+			{
+				r = DecodeHeader(ScanType.Type);
+			}
+			catch (Exception)
+			{
+				return false;
+			}
 
 			return r;
 		}
 
-		protected override bool InternalInfo(int* width, int* height, ColorComponents* sourceComp)
+		protected override unsafe bool InternalInfo(ref int width, ref int height, ref ColorComponents sourceComp)
 		{
 			if (!DecodeHeader(ScanType.Header))
 			{
@@ -1766,12 +1773,9 @@ namespace StbImageSharp
 				return false;
 			}
 
-			if (width != null)
-				*width = Context.img_x;
-			if (height != null)
-				*height = Context.img_y;
-			if (sourceComp != null)
-				*sourceComp = (ColorComponents)(Context.img_n >= 3 ? 3 : 1);
+			width = Context.img_x;
+			height = Context.img_y;
+			sourceComp = (ColorComponents)(Context.img_n >= 3 ? 3 : 1);
 			return true;
 		}
 	}
