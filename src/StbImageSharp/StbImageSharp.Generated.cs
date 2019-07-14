@@ -64,15 +64,14 @@ namespace StbImageSharp
 			public int channel_order;
 		}
 
-		[StructLayout(LayoutKind.Sequential)]
-		public struct stbi__huffman
+		public class stbi__huffman
 		{
-			public fixed byte fast[1 << 9];
-			public fixed ushort code[256];
-			public fixed byte values[256];
-			public fixed byte size[257];
-			public fixed uint maxcode[18];
-			public fixed int delta[17];
+			public byte[] fast = new byte[1 << 9];
+			public ushort[] code = new ushort[256];
+			public byte[] values = new byte[256];
+			public byte[] size = new byte[257];
+			public uint[] maxcode = new uint[18];
+			public int[] delta = new int[17];
 		}
 
 		[StructLayout(LayoutKind.Sequential)]
@@ -296,7 +295,6 @@ namespace StbImageSharp
 				return (null);
 			if (ri.bits_per_channel != 8)
 			{
-				(void)((!!((ri.bits_per_channel) == (16))) || (_wassert("ri.bits_per_channel == 16", "stb_image.h", (uint)(1127)), 0));
 				result = stbi__convert_16_to_8((ushort*)(result), (int)(*x), (int)(*y), (int)((req_comp) == (0) ? *comp : req_comp));
 				ri.bits_per_channel = (int)(8);
 			}
@@ -318,7 +316,6 @@ namespace StbImageSharp
 				return (null);
 			if (ri.bits_per_channel != 16)
 			{
-				(void)((!!((ri.bits_per_channel) == (8))) || (_wassert("ri.bits_per_channel == 8", "stb_image.h", (uint)(1151)), 0));
 				result = stbi__convert_8_to_16((byte*)(result), (int)(*x), (int)(*y), (int)((req_comp) == (0) ? *comp : req_comp));
 				ri.bits_per_channel = (int)(16);
 			}
@@ -515,7 +512,6 @@ namespace StbImageSharp
 			byte* good;
 			if ((req_comp) == (img_n))
 				return data;
-			(void)((!!(((req_comp) >= (1)) && (req_comp <= 4))) || (_wassert("req_comp >= 1 && req_comp <= 4", "stb_image.h", (uint)(1586)), 0));
 			good = (byte*)(stbi__malloc_mad3((int)(req_comp), (int)(x), (int)(y), (int)(0)));
 			if ((good) == (null))
 			{
@@ -612,7 +608,7 @@ namespace StbImageSharp
 						}
 						break;
 					default:
-						(void)((!!(0)) || (_wassert("0", "stb_image.h", (uint)(1615)), 0));
+						return ((byte*)((ulong)((stbi__err("0")) != 0 ? ((byte*)null) : (null))));
 				}
 			}
 			CRuntime.free(data);
@@ -631,7 +627,6 @@ namespace StbImageSharp
 			ushort* good;
 			if ((req_comp) == (img_n))
 				return data;
-			(void)((!!(((req_comp) >= (1)) && (req_comp <= 4))) || (_wassert("req_comp >= 1 && req_comp <= 4", "stb_image.h", (uint)(1635)), 0));
 			good = (ushort*)(stbi__malloc((ulong)(req_comp * x * y * 2)));
 			if ((good) == (null))
 			{
@@ -728,14 +723,14 @@ namespace StbImageSharp
 						}
 						break;
 					default:
-						(void)((!!(0)) || (_wassert("0", "stb_image.h", (uint)(1664)), 0));
+						return (ushort*)((byte*)((ulong)((stbi__err("0")) != 0 ? ((byte*)null) : (null))));
 				}
 			}
 			CRuntime.free(data);
 			return good;
 		}
 
-		public static int stbi__build_huffman(stbi__huffman* h, int* count)
+		public static int stbi__build_huffman(stbi__huffman h, int* count)
 		{
 			int i = 0;
 			int j = 0;
@@ -745,58 +740,58 @@ namespace StbImageSharp
 			{
 				for (j = (int)(0); (j) < (count[i]); ++j)
 				{
-					h->size[k++] = ((byte)(i + 1));
+					h.size[k++] = ((byte)(i + 1));
 				}
 			}
-			h->size[k] = (byte)(0);
+			h.size[k] = (byte)(0);
 			code = (uint)(0);
 			k = (int)(0);
 			for (j = (int)(1); j <= 16; ++j)
 			{
-				h->delta[j] = (int)(k - code);
-				if ((h->size[k]) == (j))
+				h.delta[j] = (int)(k - code);
+				if ((h.size[k]) == (j))
 				{
-					while ((h->size[k]) == (j))
+					while ((h.size[k]) == (j))
 					{
-						h->code[k++] = ((ushort)(code++));
+						h.code[k++] = ((ushort)(code++));
 					}
 					if ((code - 1) >= (1u << j))
 						return (int)(stbi__err("bad code lengths"));
 				}
-				h->maxcode[j] = (uint)(code << (16 - j));
+				h.maxcode[j] = (uint)(code << (16 - j));
 				code <<= 1;
 			}
-			h->maxcode[j] = (uint)(0xffffffff);
-			CRuntime.memset(h->fast, (int)(255), (ulong)(1 << 9));
+			h.maxcode[j] = (uint)(0xffffffff);
+			CRuntime.memset(h.fast, (int)(255), (ulong)(1 << 9));
 			for (i = (int)(0); (i) < (k); ++i)
 			{
-				int s = (int)(h->size[i]);
+				int s = (int)(h.size[i]);
 				if (s <= 9)
 				{
-					int c = (int)(h->code[i] << (9 - s));
+					int c = (int)(h.code[i] << (9 - s));
 					int m = (int)(1 << (9 - s));
 					for (j = (int)(0); (j) < (m); ++j)
 					{
-						h->fast[c + j] = ((byte)(i));
+						h.fast[c + j] = ((byte)(i));
 					}
 				}
 			}
 			return (int)(1);
 		}
 
-		public static void stbi__build_fast_ac(short* fast_ac, stbi__huffman* h)
+		public static void stbi__build_fast_ac(short* fast_ac, stbi__huffman h)
 		{
 			int i = 0;
 			for (i = (int)(0); (i) < (1 << 9); ++i)
 			{
-				byte fast = (byte)(h->fast[i]);
+				byte fast = (byte)(h.fast[i]);
 				fast_ac[i] = (short)(0);
 				if ((fast) < (255))
 				{
-					int rs = (int)(h->values[fast]);
+					int rs = (int)(h.values[fast]);
 					int run = (int)((rs >> 4) & 15);
 					int magbits = (int)(rs & 15);
-					int len = (int)(h->size[fast]);
+					int len = (int)(h.size[fast]);
 					if (((magbits) != 0) && (len + magbits <= 9))
 					{
 						int k = (int)(((i << len) & ((1 << 9) - 1)) >> (9 - magbits));
@@ -835,7 +830,7 @@ namespace StbImageSharp
 			while (j.code_bits <= 24);
 		}
 
-		public static int stbi__jpeg_huff_decode(stbi__jpeg j, stbi__huffman* h)
+		public static int stbi__jpeg_huff_decode(stbi__jpeg j, stbi__huffman h)
 		{
 			uint temp = 0;
 			int c = 0;
@@ -843,21 +838,21 @@ namespace StbImageSharp
 			if ((j.code_bits) < (16))
 				stbi__grow_buffer_unsafe(j);
 			c = (int)((j.code_buffer >> (32 - 9)) & ((1 << 9) - 1));
-			k = (int)(h->fast[c]);
+			k = (int)(h.fast[c]);
 			if ((k) < (255))
 			{
-				int s = (int)(h->size[k]);
+				int s = (int)(h.size[k]);
 				if ((s) > (j.code_bits))
 					return (int)(-1);
 				j.code_buffer <<= s;
 				j.code_bits -= (int)(s);
-				return (int)(h->values[k]);
+				return (int)(h.values[k]);
 			}
 
 			temp = (uint)(j.code_buffer >> 16);
 			for (k = (int)(9 + 1); ; ++k)
 			{
-				if ((temp) < (h->maxcode[k]))
+				if ((temp) < (h.maxcode[k]))
 					break;
 			}
 			if ((k) == (17))
@@ -868,11 +863,10 @@ namespace StbImageSharp
 
 			if ((k) > (j.code_bits))
 				return (int)(-1);
-			c = (int)(((j.code_buffer >> (32 - k)) & StbImage.stbi__bmask[k]) + h->delta[k]);
-			(void)((!!((((j.code_buffer) >> (32 - h->size[c])) & StbImage.stbi__bmask[h->size[c]]) == (h->code[c]))) || (_wassert("(((j->code_buffer) >> (32 - h->size[c])) & stbi__bmask[h->size[c]]) == h->code[c]", "stb_image.h", (uint)(1951)), 0));
+			c = (int)(((j.code_buffer >> (32 - k)) & StbImage.stbi__bmask[k]) + h.delta[k]);
 			j.code_bits -= (int)(k);
 			j.code_buffer <<= k;
-			return (int)(h->values[c]);
+			return (int)(h.values[c]);
 		}
 
 		public static int stbi__extend_receive(stbi__jpeg j, int n)
@@ -883,7 +877,6 @@ namespace StbImageSharp
 				stbi__grow_buffer_unsafe(j);
 			sgn = (int)((int)j.code_buffer >> 31);
 			k = (uint)(CRuntime._lrotl(j.code_buffer, (int)(n)));
-			(void)((!!(((n) >= (0)) && ((n) < ((int)(sizeof((StbImage.stbi__bmask)) / sizeof((* StbImage.stbi__bmask))))))) || (_wassert("n >= 0 && n < (int) (sizeof(stbi__bmask)/sizeof(*stbi__bmask))", "stb_image.h", (uint)(1972)), 0));
 			j.code_buffer = (uint)(k & ~StbImage.stbi__bmask[n]);
 			k &= (uint)(StbImage.stbi__bmask[n]);
 			j.code_bits -= (int)(n);
@@ -913,7 +906,7 @@ namespace StbImageSharp
 			return (int)(k & 0x80000000);
 		}
 
-		public static int stbi__jpeg_decode_block(stbi__jpeg j, short* data, stbi__huffman* hdc, stbi__huffman* hac, short* fac, int b, ushort* dequant)
+		public static int stbi__jpeg_decode_block(stbi__jpeg j, short* data, stbi__huffman hdc, stbi__huffman hac, short* fac, int b, ushort* dequant)
 		{
 			int diff = 0;
 			int dc = 0;
@@ -974,7 +967,7 @@ namespace StbImageSharp
 			return (int)(1);
 		}
 
-		public static int stbi__jpeg_decode_block_prog_dc(stbi__jpeg j, short* data, stbi__huffman* hdc, int b)
+		public static int stbi__jpeg_decode_block_prog_dc(stbi__jpeg j, short* data, stbi__huffman hdc, int b)
 		{
 			int diff = 0;
 			int dc = 0;
@@ -1001,7 +994,7 @@ namespace StbImageSharp
 			return (int)(1);
 		}
 
-		public static int stbi__jpeg_decode_block_prog_ac(stbi__jpeg j, short* data, stbi__huffman* hac, short* fac)
+		public static int stbi__jpeg_decode_block_prog_ac(stbi__jpeg j, short* data, stbi__huffman hac, short* fac)
 		{
 			int k = 0;
 			if ((j.spec_start) == (0))
@@ -1352,7 +1345,7 @@ namespace StbImageSharp
 						for (i = (int)(0); (i) < (w); ++i)
 						{
 							int ha = (int)(z.img_comp[n].ha);
-							if (stbi__jpeg_decode_block(z, data, (stbi__huffman*)z.huff_dc + z.img_comp[n].hd, (stbi__huffman*)z.huff_ac + ha, z.fast_ac[ha], (int)(n), (ushort*)z.dequant[z.img_comp[n].tq]) == 0)
+							if (stbi__jpeg_decode_block(z, data, z.huff_dc[z.img_comp[n].hd], z.huff_ac[ha], z.fast_ac[ha], (int)(n), (ushort*)z.dequant[z.img_comp[n].tq]) == 0)
 								return (int)(0);
 							z.idct_block_kernel(z.img_comp[n].data + z.img_comp[n].w2 * j * 8 + i * 8, (int)(z.img_comp[n].w2), data);
 							if (--z.todo <= 0)
@@ -1389,7 +1382,7 @@ namespace StbImageSharp
 										int x2 = (int)((i * z.img_comp[n].h + x) * 8);
 										int y2 = (int)((j * z.img_comp[n].v + y) * 8);
 										int ha = (int)(z.img_comp[n].ha);
-										if (stbi__jpeg_decode_block(z, data, (stbi__huffman*)z.huff_dc + z.img_comp[n].hd, (stbi__huffman*)z.huff_ac + ha, z.fast_ac[ha], (int)(n), (ushort*)z.dequant[z.img_comp[n].tq]) == 0)
+										if (stbi__jpeg_decode_block(z, data, z.huff_dc[z.img_comp[n].hd], z.huff_ac[ha], z.fast_ac[ha], (int)(n), (ushort*)z.dequant[z.img_comp[n].tq]) == 0)
 											return (int)(0);
 										z.idct_block_kernel(z.img_comp[n].data + z.img_comp[n].w2 * y2 + x2, (int)(z.img_comp[n].w2), data);
 									}
@@ -1424,13 +1417,13 @@ namespace StbImageSharp
 							short* data = z.img_comp[n].coeff + 64 * (i + j * z.img_comp[n].coeff_w);
 							if ((z.spec_start) == (0))
 							{
-								if (stbi__jpeg_decode_block_prog_dc(z, data, (stbi__huffman*)z.huff_dc + z.img_comp[n].hd, (int)(n)) == 0)
+								if (stbi__jpeg_decode_block_prog_dc(z, data, z.huff_dc[z.img_comp[n].hd], (int)(n)) == 0)
 									return (int)(0);
 							}
 							else
 							{
 								int ha = (int)(z.img_comp[n].ha);
-								if (stbi__jpeg_decode_block_prog_ac(z, data, (stbi__huffman*)z.huff_ac + ha, z.fast_ac[ha]) == 0)
+								if (stbi__jpeg_decode_block_prog_ac(z, data, z.huff_ac[ha], z.fast_ac[ha]) == 0)
 									return (int)(0);
 							}
 							if (--z.todo <= 0)
@@ -1466,7 +1459,7 @@ namespace StbImageSharp
 										int x2 = (int)(i * z.img_comp[n].h + x);
 										int y2 = (int)(j * z.img_comp[n].v + y);
 										short* data = z.img_comp[n].coeff + 64 * (x2 + y2 * z.img_comp[n].coeff_w);
-										if (stbi__jpeg_decode_block_prog_dc(z, data, (stbi__huffman*)z.huff_dc + z.img_comp[n].hd, (int)(n)) == 0)
+										if (stbi__jpeg_decode_block_prog_dc(z, data, z.huff_dc[z.img_comp[n].hd], (int)(n)) == 0)
 											return (int)(0);
 									}
 								}
@@ -1574,13 +1567,13 @@ namespace StbImageSharp
 						L -= (int)(17);
 						if ((tc) == (0))
 						{
-							if (stbi__build_huffman((stbi__huffman*)z.huff_dc + th, sizes) == 0)
+							if (stbi__build_huffman(z.huff_dc[th], sizes) == 0)
 								return (int)(0);
 							v = z.huff_dc[th].values;
 						}
 						else
 						{
-							if (stbi__build_huffman((stbi__huffman*)z.huff_ac + th, sizes) == 0)
+							if (stbi__build_huffman(z.huff_ac[th], sizes) == 0)
 								return (int)(0);
 							v = z.huff_ac[th].values;
 						}
@@ -1589,7 +1582,7 @@ namespace StbImageSharp
 							v[i] = (byte)(stbi__get8(z.s));
 						}
 						if (tc != 0)
-							stbi__build_fast_ac(z.fast_ac[th], (stbi__huffman*)z.huff_ac + th);
+							stbi__build_fast_ac(z.fast_ac[th], z.huff_ac[th]);
 						L -= (int)(n);
 					}
 					return (int)((L) == (0) ? 1 : 0);
@@ -1921,17 +1914,12 @@ namespace StbImageSharp
 
 		public static byte* resample_row_1(byte* _out_, byte* in_near, byte* in_far, int w, int hs)
 		{
-			(void)(_out_);
-			(void)(in_far);
-			(void)(w);
-			(void)(hs);
 			return in_near;
 		}
 
 		public static byte* stbi__resample_row_v_2(byte* _out_, byte* in_near, byte* in_far, int w, int hs)
 		{
 			int i = 0;
-			(void)(hs);
 			for (i = (int)(0); (i) < (w); ++i)
 			{
 				_out_[i] = ((byte)((3 * in_near[i] + in_far[i] + 2) >> 2));
@@ -1959,8 +1947,6 @@ namespace StbImageSharp
 			}
 			_out_[i * 2 + 0] = ((byte)((input[w - 2] * 3 + input[w - 1] + 2) >> 2));
 			_out_[i * 2 + 1] = (byte)(input[w - 1]);
-			(void)(in_far);
-			(void)(hs);
 			return _out_;
 		}
 
@@ -1985,7 +1971,6 @@ namespace StbImageSharp
 				_out_[i * 2] = ((byte)((3 * t1 + t0 + 8) >> 4));
 			}
 			_out_[w * 2 - 1] = ((byte)((t1 + 2) >> 2));
-			(void)(hs);
 			return _out_;
 		}
 
@@ -1993,7 +1978,6 @@ namespace StbImageSharp
 		{
 			int i = 0;
 			int j = 0;
-			(void)(in_far);
 			for (i = (int)(0); (i) < (w); ++i)
 			{
 				for (j = (int)(0); (j) < (hs); ++j)
@@ -2278,7 +2262,6 @@ namespace StbImageSharp
 		{
 			byte* result;
 			stbi__jpeg j = (stbi__jpeg)(stbi__malloc((ulong)(sizeof(stbi__jpeg))));
-			(void)(ri);
 			j.s = s;
 			stbi__setup_jpeg(j);
 			result = load_jpeg_image(j, x, y, comp, (int)(req_comp));
@@ -2336,7 +2319,6 @@ namespace StbImageSharp
 
 		public static int stbi__bit_reverse(int v, int bits)
 		{
-			(void)((!!(bits <= 16)) || (_wassert("bits <= 16", "stb_image.h", (uint)(3880)), 0));
 			return (int)(stbi__bitreverse16((int)(v)) >> (16 - bits));
 		}
 
@@ -2409,7 +2391,6 @@ namespace StbImageSharp
 		{
 			do
 			{
-				(void)((!!((z->code_buffer) < (1U << z->num_bits))) || (_wassert("z->code_buffer < (1U << z->num_bits)", "stb_image.h", (uint)(3962)), 0));
 				z->code_buffer |= (uint)((uint)(stbi__zget8(z)) << z->num_bits);
 				z->num_bits += (int)(8);
 			}
@@ -2441,7 +2422,6 @@ namespace StbImageSharp
 			if ((s) == (16))
 				return (int)(-1);
 			b = (int)((k >> (16 - s)) - z->firstcode[s] + z->firstsymbol[s]);
-			(void)((!!((z->size[b]) == (s))) || (_wassert("z->size[b] == s", "stb_image.h", (uint)(3990)), 0));
 			a->code_buffer >>= s;
 			a->num_bits -= (int)(s);
 			return (int)(z->value[b]);
@@ -2481,7 +2461,6 @@ namespace StbImageSharp
 				limit *= (int)(2);
 			}
 			q = (sbyte*)(CRuntime.realloc(z->zout_start, (ulong)(limit)));
-			(void)(old_limit);
 			if ((q) == (null))
 				return (int)(stbi__err("outofmem"));
 			z->zout_start = q;
@@ -2622,7 +2601,6 @@ namespace StbImageSharp
 						c = (int)(stbi__zreceive(a, (int)(3)) + 3);
 					else
 					{
-						(void)((!!((c) == (18))) || (_wassert("c == 18", "stb_image.h", (uint)(4120)), 0));
 						c = (int)(stbi__zreceive(a, (int)(7)) + 11);
 					}
 					if ((ntot - n) < (c))
@@ -2655,7 +2633,6 @@ namespace StbImageSharp
 				a->code_buffer >>= 8;
 				a->num_bits -= (int)(8);
 			}
-			(void)((!!((a->num_bits) == (0))) || (_wassert("a->num_bits == 0", "stb_image.h", (uint)(4147)), 0));
 			while ((k) < (4))
 			{
 				header[k++] = (byte)(stbi__zget8(a));
@@ -2891,7 +2868,6 @@ namespace StbImageSharp
 			int output_bytes = (int)(out_n * bytes);
 			int filter_bytes = (int)(img_n * bytes);
 			int width = (int)(x);
-			(void)((!!(((out_n) == (s.img_n)) || ((out_n) == (s.img_n + 1)))) || (_wassert("out_n == s->img_n || out_n == s->img_n+1", "stb_image.h", (uint)(4408)), 0));
 			a._out_ = (byte*)(stbi__malloc_mad3((int)(x), (int)(y), (int)(output_bytes), (int)(0)));
 			if (a._out_ == null)
 				return (int)(stbi__err("outofmem"));
@@ -2910,7 +2886,6 @@ namespace StbImageSharp
 					return (int)(stbi__err("invalid filter"));
 				if ((depth) < (8))
 				{
-					(void)((!!(img_width_bytes <= x)) || (_wassert("img_width_bytes <= x", "stb_image.h", (uint)(4430)), 0));
 					cur += x * out_n - img_width_bytes;
 					filter_bytes = (int)(1);
 					width = (int)(img_width_bytes);
@@ -3019,7 +2994,6 @@ namespace StbImageSharp
 				}
 				else
 				{
-					(void)((!!((img_n + 1) == (out_n))) || (_wassert("img_n+1 == out_n", "stb_image.h", (uint)(4492)), 0));
 					switch (filter)
 					{
 						case STBI__F_none:
@@ -3171,7 +3145,6 @@ namespace StbImageSharp
 						}
 						else
 						{
-							(void)((!!((img_n) == (3))) || (_wassert("img_n == 3", "stb_image.h", (uint)(4581)), 0));
 							for (q = (int)(x - 1); (q) >= (0); --q)
 							{
 								cur[q * 4 + 3] = (byte)(255);
@@ -3277,7 +3250,6 @@ namespace StbImageSharp
 			uint i = 0;
 			uint pixel_count = (uint)(s.img_x * s.img_y);
 			byte* p = z._out_;
-			(void)((!!(((out_n) == (2)) || ((out_n) == (4)))) || (_wassert("out_n == 2 || out_n == 4", "stb_image.h", (uint)(4659)), 0));
 			if ((out_n) == (2))
 			{
 				for (i = (uint)(0); (i) < (pixel_count); ++i)
@@ -3305,7 +3277,6 @@ namespace StbImageSharp
 			uint i = 0;
 			uint pixel_count = (uint)(s.img_x * s.img_y);
 			ushort* p = (ushort*)(z._out_);
-			(void)((!!(((out_n) == (2)) || ((out_n) == (4)))) || (_wassert("out_n == 2 || out_n == 4", "stb_image.h", (uint)(4684)), 0));
 			if ((out_n) == (2))
 			{
 				for (i = (uint)(0); (i) < (pixel_count); ++i)
@@ -3364,7 +3335,6 @@ namespace StbImageSharp
 
 			CRuntime.free(a._out_);
 			a._out_ = temp_out;
-			(void)(len);
 			return (int)(1);
 		}
 
@@ -3396,7 +3366,6 @@ namespace StbImageSharp
 			}
 			else
 			{
-				(void)((!!((s.img_out_n) == (4))) || (_wassert("s->img_out_n == 4", "stb_image.h", (uint)(4765)), 0));
 				if ((StbImage.stbi__unpremultiply_on_load) != 0)
 				{
 					for (i = (uint)(0); (i) < (pixel_count); ++i)
@@ -3609,7 +3578,6 @@ namespace StbImageSharp
 							{
 								idata_limit *= (uint)(2);
 							}
-							(void)(idata_limit_old);
 							p = (byte*)(CRuntime.realloc(z.idata, (ulong)(idata_limit)));
 							if ((p) == (null))
 								return (int)(stbi__err("outofmem"));
@@ -3886,9 +3854,7 @@ namespace StbImageSharp
 				v <<= -shift;
 			else
 				v >>= shift;
-			(void)((!!(((v) >= (0)) && ((v) < (256)))) || (_wassert("v >= 0 && v < 256", "stb_image.h", (uint)(5112)), 0));
 			v >>= (8 - bits);
-			(void)((!!(((bits) >= (0)) && (bits <= 8))) || (_wassert("bits >= 0 && bits <= 8", "stb_image.h", (uint)(5114)), 0));
 			return (int)((int)(v * mul_table[bits]) >> shift_table[bits]);
 		}
 
@@ -4015,7 +3981,6 @@ namespace StbImageSharp
 			int pad = 0;
 			int target = 0;
 			stbi__bmp_data info = new stbi__bmp_data();
-			(void)(ri);
 			info.all_a = (uint)(255);
 			if ((stbi__bmp_parse_header(s, &info)) == (null))
 				return (null);
@@ -4448,7 +4413,6 @@ namespace StbImageSharp
 			int RLE_count = (int)(0);
 			int RLE_repeating = (int)(0);
 			int read_next_pixel = (int)(1);
-			(void)(ri);
 			if ((tga_image_type) >= (8))
 			{
 				tga_image_type -= (int)(8);
@@ -4495,7 +4459,6 @@ namespace StbImageSharp
 					if ((tga_rgb16) != 0)
 					{
 						byte* pal_entry = tga_palette;
-						(void)((!!((tga_comp) == (STBI_rgb))) || (_wassert("tga_comp == STBI_rgb", "stb_image.h", (uint)(5599)), 0));
 						for (i = (int)(0); (i) < (tga_palette_len); ++i)
 						{
 							stbi__tga_read_rgb16(s, pal_entry);
@@ -4546,7 +4509,6 @@ namespace StbImageSharp
 						}
 						else if ((tga_rgb16) != 0)
 						{
-							(void)((!!((tga_comp) == (STBI_rgb))) || (_wassert("tga_comp == STBI_rgb", "stb_image.h", (uint)(5648)), 0));
 							stbi__tga_read_rgb16(s, raw_data);
 						}
 						else
@@ -4666,7 +4628,6 @@ namespace StbImageSharp
 			int w = 0;
 			int h = 0;
 			byte* _out_;
-			(void)(ri);
 			if (stbi__get32be(s) != 0x38425053)
 				return ((byte*)((ulong)((stbi__err("not PSD")) != 0 ? ((byte*)null) : (null))));
 			if (stbi__get16be(s) != 1)
@@ -5042,7 +5003,6 @@ namespace StbImageSharp
 			int first_frame = 0;
 			int pi = 0;
 			int pcount = 0;
-			(void)(req_comp);
 			first_frame = (int)(0);
 			if ((g._out_) == (null))
 			{
@@ -5284,7 +5244,6 @@ namespace StbImageSharp
 			byte* u = null;
 			stbi__gif g = new stbi__gif();
 
-			(void)(ri);
 			u = stbi__gif_load_next(s, g, comp, (int)(req_comp), null);
 			if ((u) == ((byte*)(s)))
 				u = null;

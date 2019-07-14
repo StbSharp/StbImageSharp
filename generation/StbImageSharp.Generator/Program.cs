@@ -59,6 +59,7 @@ namespace StbSharp.StbImage.Generator
 						"stbi__resample",
 						"stbi__gif",
 						"stbi__context",
+						"stbi__huffman",
 						"stbi__png"
 					},
 				GlobalArrays = new[]

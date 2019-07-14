@@ -542,7 +542,7 @@ STBIDEF int   stbi_zlib_decode_noheader_buffer(char *obuffer, int olen, const ch
 
 #ifndef STBI_ASSERT
 #include <assert.h>
-#define STBI_ASSERT(x) assert(x)
+#define STBI_ASSERT(x)
 #endif
 
 #ifdef __cplusplus
@@ -580,9 +580,9 @@ typedef int32_t  stbi__int32;
 typedef unsigned char validate_uint32[sizeof(stbi__uint32)==4 ? 1 : -1];
 
 #ifdef _MSC_VER
-#define STBI_NOTUSED(v)  (void)(v)
+#define STBI_NOTUSED(v)
 #else
-#define STBI_NOTUSED(v)  (void)sizeof(v)
+#define STBI_NOTUSED(v)
 #endif
 
 #ifdef _MSC_VER
@@ -1003,7 +1003,6 @@ STBIDEF void stbi_set_flip_vertically_on_load(int flag_true_if_should_flip)
 
 static void *stbi__load_main(stbi__context *s, int *x, int *y, int *comp, int req_comp, stbi__result_info *ri, int bpc)
 {
-   memset(ri, 0, sizeof(*ri)); // make sure it's initialized if we add new fields
    ri->bits_per_channel = 8; // default is 8 so most paths don't have to be changed
    ri->channel_order = STBI_ORDER_RGB; // all current input & output are this, but this is here so we can add BGR order
    ri->num_channels = 0;
@@ -1613,7 +1612,7 @@ static unsigned char *stbi__convert_format(unsigned char *data, int img_n, int r
          STBI__CASE(4,1) { dest[0]=stbi__compute_y(src[0],src[1],src[2]);                   } break;
          STBI__CASE(4,2) { dest[0]=stbi__compute_y(src[0],src[1],src[2]); dest[1] = src[3]; } break;
          STBI__CASE(4,3) { dest[0]=src[0];dest[1]=src[1];dest[2]=src[2];                    } break;
-         default: STBI_ASSERT(0);
+         default: return stbi__errpuc("0", "0");
       }
       #undef STBI__CASE
    }
@@ -1662,7 +1661,7 @@ static stbi__uint16 *stbi__convert_format16(stbi__uint16 *data, int img_n, int r
          STBI__CASE(4,1) { dest[0]=stbi__compute_y_16(src[0],src[1],src[2]);                   } break;
          STBI__CASE(4,2) { dest[0]=stbi__compute_y_16(src[0],src[1],src[2]); dest[1] = src[3]; } break;
          STBI__CASE(4,3) { dest[0]=src[0];dest[1]=src[1];dest[2]=src[2];                       } break;
-         default: STBI_ASSERT(0);
+         default: return (stbi__uint16 *)stbi__errpuc("0", "0");
       }
       #undef STBI__CASE
    }
