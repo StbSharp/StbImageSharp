@@ -32,7 +32,7 @@ namespace StbImageSharp
 			public EofCallback eof;
 		}
 
-		public class stbi__context
+		public class stbi__context: IDisposable
 		{
 			public uint img_x = 0;
 			public uint img_y = 0;
@@ -47,6 +47,20 @@ namespace StbImageSharp
 			public byte* img_buffer_end;
 			public byte* img_buffer_original;
 			public byte* img_buffer_original_end;
+
+			~stbi__context()
+			{
+				Dispose();
+			}
+
+			public void Dispose()
+			{
+				if (buffer_start != null)
+				{
+					CRuntime.free(buffer_start);
+					buffer_start = null;
+				}
+			}
 		}
 
 		[StructLayout(LayoutKind.Sequential)]
@@ -155,12 +169,13 @@ namespace StbImageSharp
 			public byte suffix;
 		}
 
-		public class stbi__gif
+		public class stbi__gif: IDisposable
 		{
 			public int w;
 			public int h;
 			public byte* _out_;
-			public byte* old_out;
+			public byte* background;
+			public byte* history;
 			public int flags;
 			public int bgindex;
 			public int ratio;
@@ -169,7 +184,7 @@ namespace StbImageSharp
 			public int delay;
 			public byte* pal;
 			public byte* lpal;
-			public stbi__gif_lzw* codes;
+			public stbi__gif_lzw* codes = (stbi__gif_lzw*)stbi__malloc(8192 * sizeof(stbi__gif_lzw));
 			public byte* color_table;
 			public int parse;
 			public int step;
@@ -184,9 +199,34 @@ namespace StbImageSharp
 
 			public stbi__gif()
 			{
-				codes = (stbi__gif_lzw*) stbi__malloc(4096 * sizeof(stbi__gif_lzw));
 				pal = (byte*) stbi__malloc(256 * 4 * sizeof(byte));
 				lpal = (byte*) stbi__malloc(256 * 4 * sizeof(byte));
+			}
+
+			~stbi__gif()
+			{
+				Dispose();
+			}
+
+			public void Dispose()
+			{
+				if (pal != null)
+				{
+					CRuntime.free(pal);
+					pal = null;
+				}
+
+				if (lpal != null)
+				{
+					CRuntime.free(lpal);
+					lpal = null;
+				}
+
+				if (codes != null)
+				{
+					CRuntime.free(codes);
+					codes = null;
+				}
 			}
 		}
 
@@ -216,47 +256,6 @@ namespace StbImageSharp
 				pal[i * 4] = stbi__get8(s);
 				pal[i * 4 + 3] = (byte) (transp == i ? 0 : 255);
 			}
-		}
-
-		public static Image LoadFromMemory(byte[] bytes, int req_comp = STBI_default)
-		{
-			Image image;
-			byte* result = null;
-			int x, y, comp;
-
-			try
-			{
-				fixed (byte* b = bytes)
-				{
-					result = stbi_load_from_memory(b, bytes.Length, &x, &y, &comp, req_comp);
-				}
-
-				if (result == null)
-				{
-					throw new InvalidOperationException(LastError);
-				}
-
-				image = new Image
-				{
-					Width = x,
-					Height = y,
-					SourceComp = comp,
-					Comp = req_comp == STBI_default ? comp : req_comp
-				};
-
-				// Convert to array
-				image.Data = new byte[x * y * image.Comp];
-				Marshal.Copy(new IntPtr(result), image.Data, 0, image.Data.Length);
-			}
-			finally
-			{
-				if (result != null)
-				{
-					CRuntime.free(result);
-				}
-			}
-
-			return image;
 		}
 	}
 }

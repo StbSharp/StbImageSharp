@@ -148,8 +148,8 @@ namespace StbImageSharp.Testing
 				var sw = new Stopwatch();
 
 				if (!f.EndsWith(".bmp") && !f.EndsWith(".jpg") && !f.EndsWith(".png") &&
-				    !f.EndsWith(".jpg") && !f.EndsWith(".psd") && !f.EndsWith(".pic") &&
-				    !f.EndsWith(".tga"))
+					!f.EndsWith(".jpg") && !f.EndsWith(".psd") && !f.EndsWith(".pic") &&
+					!f.EndsWith(".tga"))
 				{
 					return;
 				}
@@ -159,7 +159,7 @@ namespace StbImageSharp.Testing
 				var data = File.ReadAllBytes(f);
 				Log("----------------------------");
 
-				Log("Loading From Stream");
+				Log("Loading");
 				int x = 0, y = 0;
 				ColorComponents comp = ColorComponents.Default;
 				int stbSharpPassed, stbNativePassed;
@@ -168,40 +168,34 @@ namespace StbImageSharp.Testing
 					sw,
 					(out int xx, out int yy, out ColorComponents ccomp) =>
 					{
-						using (var ms = new MemoryStream(data))
-						{
-							var img = Image.FromStream(ms);
+						var img = Image.FromMemory(data);
 
-							parsed = img.Data;
-							xx = img.Width;
-							yy = img.Height;
-							ccomp = img.SourceComp;
+						parsed = img.Data;
+						xx = img.Width;
+						yy = img.Height;
+						ccomp = img.SourceComp;
 
-							x = xx;
-							y = yy;
-							comp = ccomp;
-							return parsed;
-						}
+						x = xx;
+						y = yy;
+						comp = ccomp;
+						return parsed;
 					},
 					(out int xx, out int yy, out ColorComponents ccomp) =>
 					{
-						using (var ms = new MemoryStream(data))
-						{
-							int c;
-							var result = Native.load_from_stream(ms, out xx, out yy, out c, 0);
-							ccomp = (ColorComponents)c;
-							return result;
-						}
+						int c;
+						var result = Native.load_from_memory(data, out xx, out yy, out c, 0);
+						ccomp = (ColorComponents)c;
+						return result;
 					},
 					out stbSharpPassed, out stbNativePassed
 				);
 				stbSharpLoading += stbSharpPassed;
 				stbNativeLoading += stbNativePassed;
 
-				Log("Total StbSharp Loading From Stream Time: {0} ms", stbSharpLoading);
-				Log("Total Stb.Native Loading From Stream Time: {0} ms", stbNativeLoading);
+				Log("Total StbSharp Loading Time: {0} ms", stbSharpLoading);
+				Log("Total Stb.Native Loading Time: {0} ms", stbNativeLoading);
 
-				Log("Native Memory Allocations not freed: " + Memory.Allocations);
+				Log("Native Memory Allocations not freed: " + MemoryStats.Allocations);
 				Log("GC Memory: {0}", GC.GetTotalMemory(true));
 
 				++filesProcessed;

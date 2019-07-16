@@ -4950,10 +4950,6 @@ static int stbi__parse_png_file(stbi__png *z, int scan, int req_comp)
                #ifndef STBI_NO_FAILURE_STRINGS
                // not threadsafe
                static char invalid_chunk[] = "XXXX PNG chunk not known";
-               invalid_chunk[0] = STBI__BYTECAST(c.type >> 24);
-               invalid_chunk[1] = STBI__BYTECAST(c.type >> 16);
-               invalid_chunk[2] = STBI__BYTECAST(c.type >>  8);
-               invalid_chunk[3] = STBI__BYTECAST(c.type >>  0);
                #endif
                return stbi__err(invalid_chunk, "PNG not supported: unknown PNG chunk type");
             }
@@ -5393,9 +5389,10 @@ static int stbi__tga_get_comp(int bits_per_pixel, int is_grey, int* is_rgb16)
    if (is_rgb16) *is_rgb16 = 0;
    switch(bits_per_pixel) {
       case 8:  return STBI_grey;
-      case 16: if(is_grey) return STBI_grey_alpha;
-               // fallthrough
-      case 15: if(is_rgb16) *is_rgb16 = 1;
+      case 15:
+      case 16: 
+          if(bits_per_pixel == 16 && is_grey) return STBI_grey_alpha;
+          if(is_rgb16) *is_rgb16 = 1;
                return STBI_rgb;
       case 24: // fallthrough
       case 32: return bits_per_pixel/8;
@@ -6593,7 +6590,6 @@ static void *stbi__load_gif_main(stbi__context *s, int **delays, int *x, int *y,
 
       do {
          u = stbi__gif_load_next(s, &g, comp, req_comp, two_back);
-         if (u == (stbi_uc *) s) u = 0;  // end of animated gif marker
 
          if (u) {
             *x = g.w;
@@ -6647,7 +6643,6 @@ static void *stbi__gif_load(stbi__context *s, int *x, int *y, int *comp, int req
    STBI_NOTUSED(ri);
 
    u = stbi__gif_load_next(s, &g, comp, req_comp, 0);
-   if (u == (stbi_uc *) s) u = 0;  // end of animated gif marker
    if (u) {
       *x = g.w;
       *y = g.h;
@@ -6993,8 +6988,8 @@ static int stbi__psd_is16(stbi__context *s)
        stbi__rewind( s );
        return 0;
    }
-   (void) stbi__get32be(s);
-   (void) stbi__get32be(s);
+   stbi__get32be(s);
+   stbi__get32be(s);
    depth = stbi__get16be(s);
    if (depth != 16) {
        stbi__rewind( s );
