@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -13,10 +12,17 @@ namespace StbImageSharp.Testing
 	{
 		private static int tasksStarted;
 		private static int filesProcessed;
-		private static int stbSharpLoading;
-		private static int stbNativeLoading;
+		private static int stbSharpLoadingFromStream;
+		private static int stbNativeLoadingFromStream;
+		private static int stbSharpLoadingFromMemory;
+		private static int stbNativeLoadingFromMemory;
+
+		private delegate void WriteDelegate(Image image, Stream stream);
 
 		private const int LoadTries = 10;
+
+		private static readonly int[] JpgQualities = {1, 4, 8, 16, 25, 32, 50, 64, 72, 80, 90, 100};
+		private static readonly string[] FormatNames = {"BMP", "TGA", "HDR", "PNG", "JPG"};
 
 		public static void Log(string message)
 		{
@@ -46,7 +52,7 @@ namespace StbImageSharp.Testing
 		{
 			Log("With StbSharp");
 			int x = 0, y = 0;
-			ColorComponents comp = ColorComponents.Default;
+			var comp = ColorComponents.Default;
 			byte[] parsed = new byte[0];
 			BeginWatch(sw);
 
@@ -62,7 +68,7 @@ namespace StbImageSharp.Testing
 
 			Log("With Stb.Native");
 			int x2 = 0, y2 = 0;
-			ColorComponents comp2 = ColorComponents.Default;
+			var comp2 = ColorComponents.Default;
 			byte[] parsed2 = new byte[0];
 
 			BeginWatch(sw);
@@ -110,32 +116,25 @@ namespace StbImageSharp.Testing
 
 		public static bool RunTests()
 		{
-			try
+			var imagesPath = "..\\..\\..\\TestImages";
+
+			var files = Directory.EnumerateFiles(imagesPath, "*.*", SearchOption.AllDirectories).ToArray();
+			Log("Files count: {0}", files.Length);
+
+			foreach (var file in files)
 			{
-				var imagesPath = "..\\..\\..\\TestImages";
-
-				var files = Directory.EnumerateFiles(imagesPath, "*.*", SearchOption.AllDirectories).ToArray();
-				Log("Files count: {0}", files.Length);
-
-				foreach (var file in files)
-				{
-					Task.Factory.StartNew(() => { ThreadProc(file); });
-					tasksStarted++;
-				}
-
-				while (true)
-				{
-					Thread.Sleep(1000);
-
-					if (tasksStarted == 0)
-					{
-						break;
-					}
-				}
+				Task.Factory.StartNew(() => { ThreadProc(file); });
+				tasksStarted++;
 			}
-			catch (Exception ex)
+
+			while (true)
 			{
-				Console.WriteLine(ex);
+				Thread.Sleep(1000);
+
+				if (tasksStarted == 0)
+				{
+					break;
+				}
 			}
 
 			return true;
@@ -148,8 +147,8 @@ namespace StbImageSharp.Testing
 				var sw = new Stopwatch();
 
 				if (!f.EndsWith(".bmp") && !f.EndsWith(".jpg") && !f.EndsWith(".png") &&
-					!f.EndsWith(".jpg") && !f.EndsWith(".psd") && !f.EndsWith(".pic") &&
-					!f.EndsWith(".tga"))
+				    !f.EndsWith(".jpg") && !f.EndsWith(".psd") && !f.EndsWith(".pic") &&
+				    !f.EndsWith(".tga"))
 				{
 					return;
 				}
@@ -159,18 +158,53 @@ namespace StbImageSharp.Testing
 				var data = File.ReadAllBytes(f);
 				Log("----------------------------");
 
-				Log("Loading");
+				Log("Loading From Stream");
 				int x = 0, y = 0;
-				ColorComponents comp = ColorComponents.Default;
+				var comp = ColorComponents.Default;
 				int stbSharpPassed, stbNativePassed;
 				byte[] parsed = new byte[0];
 				ParseTest(
 					sw,
 					(out int xx, out int yy, out ColorComponents ccomp) =>
 					{
-						var img = Image.FromMemory(data);
+						using (var ms = new MemoryStream(data))
+						{
+							var loader = new ImageStreamLoader();
+							var img = loader.Read(ms, ColorComponents.RedGreenBlueAlpha);
 
-						parsed = img.Data;
+							parsed = img.Data;
+							xx = img.Width;
+							yy = img.Height;
+							ccomp = img.SourceComp;
+
+							x = xx;
+							y = yy;
+							comp = ccomp;
+							return parsed;
+						}
+					},
+					(out int xx, out int yy, out ColorComponents ccomp) =>
+					{
+						using (var ms = new MemoryStream(data))
+						{
+							var result = Native.load_from_stream(ms, out xx, out yy, out int icomp, StbImage.STBI_rgb_alpha);
+							ccomp = (ColorComponents)icomp;
+							return result;
+						}
+					},
+					out stbSharpPassed, out stbNativePassed
+				);
+				stbSharpLoadingFromStream += stbSharpPassed;
+				stbNativeLoadingFromStream += stbNativePassed;
+
+				Log("Loading from memory");
+				ParseTest(
+					sw,
+					(out int xx, out int yy, out ColorComponents ccomp) =>
+					{
+						var img = Image.FromMemory(data, ColorComponents.RedGreenBlueAlpha);
+
+						var res = img.Data;
 						xx = img.Width;
 						yy = img.Height;
 						ccomp = img.SourceComp;
@@ -178,25 +212,26 @@ namespace StbImageSharp.Testing
 						x = xx;
 						y = yy;
 						comp = ccomp;
-						return parsed;
+						return res;
 					},
 					(out int xx, out int yy, out ColorComponents ccomp) =>
 					{
-						int c;
-						var result = Native.load_from_memory(data, out xx, out yy, out c, 0);
-						ccomp = (ColorComponents)c;
+						var result = Native.load_from_memory(data, out xx, out yy, out int icomp, StbImage.STBI_rgb_alpha);
+						ccomp = (ColorComponents)icomp;
 						return result;
 					},
 					out stbSharpPassed, out stbNativePassed
 				);
-				stbSharpLoading += stbSharpPassed;
-				stbNativeLoading += stbNativePassed;
+				stbSharpLoadingFromMemory += stbSharpPassed;
+				stbNativeLoadingFromMemory += stbNativePassed;
 
-				Log("Total StbSharp Loading Time: {0} ms", stbSharpLoading);
-				Log("Total Stb.Native Loading Time: {0} ms", stbNativeLoading);
+				Log("Total StbSharp Loading From Stream Time: {0} ms", stbSharpLoadingFromStream);
+				Log("Total Stb.Native Loading From Stream Time: {0} ms", stbNativeLoadingFromStream);
+				Log("Total StbSharp Loading From memory Time: {0} ms", stbSharpLoadingFromMemory);
+				Log("Total Stb.Native Loading From memory Time: {0} ms", stbNativeLoadingFromMemory);
 
-				Log("Native Memory Allocations not freed: " + MemoryStats.Allocations);
 				Log("GC Memory: {0}", GC.GetTotalMemory(true));
+				Log("Native Allocations: {0}", MemoryStats.Allocations);
 
 				++filesProcessed;
 				Log(DateTime.Now.ToLongTimeString() + " -- " + " Files processed: " + filesProcessed);
