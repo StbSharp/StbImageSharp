@@ -17,7 +17,7 @@ namespace StbImageSharp.Testing
 		private static int stbSharpLoadingFromMemory;
 		private static int stbNativeLoadingFromMemory;
 
-		private delegate void WriteDelegate(Image image, Stream stream);
+		private delegate void WriteDelegate(ImageResult image, Stream stream);
 
 		private const int LoadTries = 10;
 
@@ -170,7 +170,7 @@ namespace StbImageSharp.Testing
 						using (var ms = new MemoryStream(data))
 						{
 							var loader = new ImageStreamLoader();
-							var img = loader.Read(ms, ColorComponents.RedGreenBlueAlpha);
+							var img = loader.Load(ms, ColorComponents.RedGreenBlueAlpha);
 
 							parsed = img.Data;
 							xx = img.Width;
@@ -202,7 +202,7 @@ namespace StbImageSharp.Testing
 					sw,
 					(out int xx, out int yy, out ColorComponents ccomp) =>
 					{
-						var img = Image.FromMemory(data, ColorComponents.RedGreenBlueAlpha);
+						var img = ImageResult.FromMemory(data, ColorComponents.RedGreenBlueAlpha);
 
 						var res = img.Data;
 						xx = img.Width;

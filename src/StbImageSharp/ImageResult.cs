@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 
 namespace StbImageSharp
 {
-	public class Image
+	public class ImageResult
 	{
 		public int Width { get; set; }
 		public int Height { get; set; }
@@ -12,14 +12,14 @@ namespace StbImageSharp
 		public ColorComponents Comp { get; set; }
 		public byte[] Data { get; set; }
 
-		internal unsafe static Image FromResult(byte* result, int width, int height, ColorComponents comp, ColorComponents req_comp)
+		internal unsafe static ImageResult FromResult(byte* result, int width, int height, ColorComponents comp, ColorComponents req_comp)
 		{
 			if (result == null)
 			{
 				throw new InvalidOperationException(StbImage.LastError);
 			}
 
-			var image = new Image
+			var image = new ImageResult
 			{
 				Width = width,
 				Height = height,
@@ -34,7 +34,7 @@ namespace StbImageSharp
 			return image;
 		}
 
-		public unsafe static Image FromMemory(byte[] bytes, ColorComponents req_comp = ColorComponents.Default)
+		public unsafe static ImageResult FromMemory(byte[] bytes, ColorComponents requiredComponents = ColorComponents.Default)
 		{
 			byte* result = null;
 
@@ -43,10 +43,10 @@ namespace StbImageSharp
 				int x, y, comp;
 				fixed (byte* b = bytes)
 				{
-					result = StbImage.stbi_load_from_memory(b, bytes.Length, &x, &y, &comp, (int)req_comp);
+					result = StbImage.stbi_load_from_memory(b, bytes.Length, &x, &y, &comp, (int)requiredComponents);
 				}
 
-				return FromResult(result, x, y, (ColorComponents)comp, req_comp);
+				return FromResult(result, x, y, (ColorComponents)comp, requiredComponents);
 			}
 			finally
 			{

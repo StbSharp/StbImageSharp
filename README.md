@@ -1,29 +1,32 @@
 # StbImageSharp
 [![NuGet](https://img.shields.io/nuget/v/StbImageSharp.svg)](https://www.nuget.org/packages/StbImageSharp/) [![Build status](https://ci.appveyor.com/api/projects/status/isyfkbfakrhoa1bm?svg=true)](https://ci.appveyor.com/project/RomanShapiro/stbtruetypesharp)
 
-StbImageSharp is C# port of the stb_image.h
+StbImageSharp is C# port of the stb_image.h, which in its turn is C library to load images in JPG, PNG, BMP, TGA, PSD and GIF formats.
 
-It is library that can load images in JPG, PNG, BMP, TGA, PSD and GIF formats.
+It is important to note, that this project is **port**(not **wrapper**). Original C code had been ported to C#. Therefore StbSharp doesnt require any native binaries.
 
-# Adding Reference
-`Install-Package StbImageSharp`
+The porting hasn't been done by hand, but using [Sichem](https://github.com/rds1983/Sichem), which is the C to C# code converter utility.
 
 # Usage
+StbImageSharp exposes API similar to stb_image.h. However that API is complicated and deals with raw unsafe pointers.
+
+Thus several utility classes had been made to wrap that functionality.
+
 'ImageStreamLoader' class wraps the call to 'stbi_load_from_callbacks' method.
+
 It could be used following way:
 ```c#
 ImageStreamLoader loader = new ImageStreamLoader();
 using (Stream stream = File.Open(path, FileMode.Open)) 
 {
-	Image image = loader.Read(stream, StbImage.STBI_rgb_alpha);
+	ImageResult image = loader.Read(stream, ColorComponents.RedGreenBlueAlpha);
 }
 ```
 
-Or 'LoadFromMemory' method wraps 'stbi_load_from_memory':
+Or 'ImageResult.FromMemory' method wraps 'stbi_load_from_memory':
 ```c# 
 byte[] buffer = File.ReadAllBytes(path);
-int x, y, comp;
-Image image = StbImage.LoadFromMemory(buffer, Stb.STBI_rgb_alpha);
+ImageResult image = ImageResult.FromMemory(buffer, ColorComponents.RedGreenBlueAlpha);
 ```
 
 Both code samples will try to load an image (JPG/PNG/BMP/TGA/PSD/GIF) located at 'path'. It'll throw Exception on failure.

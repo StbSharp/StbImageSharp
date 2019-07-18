@@ -44,7 +44,7 @@ namespace StbImageSharp
 			return res;
 		}
 
-		public Image Read(Stream stream, ColorComponents req_comp = ColorComponents.Default)
+		public ImageResult Load(Stream stream, ColorComponents requiredComponents = ColorComponents.Default)
 		{
 			byte* result = null;
 
@@ -53,9 +53,9 @@ namespace StbImageSharp
 			try
 			{
 				int x, y, comp;
-				result = StbImage.stbi_load_from_callbacks(_callbacks, null, &x, &y, &comp, (int)req_comp);
+				result = StbImage.stbi_load_from_callbacks(_callbacks, null, &x, &y, &comp, (int)requiredComponents);
 
-				return Image.FromResult(result, x, y, (ColorComponents)comp, req_comp);
+				return ImageResult.FromResult(result, x, y, (ColorComponents)comp, requiredComponents);
 			}
 			finally
 			{
@@ -67,13 +67,13 @@ namespace StbImageSharp
 			}
 		}
 
-		public AnimatedFrame[] ReadAnimatedGif(Stream stream, ColorComponents req_comp = ColorComponents.Default)
+		public AnimatedFrameResult[] ReadAnimatedGif(Stream stream, ColorComponents requiredComponents = ColorComponents.Default)
 		{
 			try
 			{
 				_stream = stream;
 
-				var res = new List<AnimatedFrame>();
+				var res = new List<AnimatedFrameResult>();
 
 				var context = new StbImage.stbi__context();
 				StbImage.stbi__start_callbacks(context, _callbacks, null);
@@ -88,18 +88,18 @@ namespace StbImageSharp
 				do
 				{
 					int comp;
-					var result = StbImage.stbi__gif_load_next(context, g, &comp, (int)req_comp, null);
+					var result = StbImage.stbi__gif_load_next(context, g, &comp, (int)requiredComponents, null);
 					if (result == null)
 					{
 						break;
 					}
 
-					var frame = new AnimatedFrame
+					var frame = new AnimatedFrameResult
 					{
 						Width = g.w,
 						Height = g.h,
 						SourceComp = (ColorComponents)comp,
-						Comp = req_comp == ColorComponents.Default ? (ColorComponents)comp : req_comp,
+						Comp = requiredComponents == ColorComponents.Default ? (ColorComponents)comp : requiredComponents,
 						Delay = g.delay
 					};
 
