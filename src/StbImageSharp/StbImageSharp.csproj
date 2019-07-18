@@ -4,9 +4,9 @@
     <Product>StbImageSharp</Product>
     <PackageId>StbImageSharp</PackageId>
     <TargetFrameworks>netstandard2.0;net45</TargetFrameworks>
-    <Description>C# port of the stb_image</Description>
+    <Description>C# port of the stb_image.h</Description>
     <PackageLicenseUrl>Public Domain</PackageLicenseUrl>
-    <PackageProjectUrl>https://github.com/rds1983/StbImageSharp</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/StbSharp/StbImageSharp</PackageProjectUrl>
     <NoWarn>NU1701</NoWarn>
     <AssemblyName>StbImageSharp</AssemblyName>
     <RootNamespace>StbImageSharp</RootNamespace>
