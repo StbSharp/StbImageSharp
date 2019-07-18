@@ -3,7 +3,7 @@
 
 StbImageSharp is C# port of the stb_image.h, which in its turn is C library to load images in JPG, PNG, BMP, TGA, PSD and GIF formats.
 
-It is important to note, that this project is **port**(not **wrapper**). Original C code had been ported to C#. Therefore StbSharp doesnt require any native binaries.
+It is important to note, that this project is **port**(not **wrapper**). Original C code had been ported to C#. Therefore StbImageSharp doesnt require any native binaries.
 
 The porting hasn't been done by hand, but using [Sichem](https://github.com/rds1983/Sichem), which is the C to C# code converter utility.
 
