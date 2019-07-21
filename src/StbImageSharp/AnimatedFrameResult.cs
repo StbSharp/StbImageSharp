@@ -1,6 +1,11 @@
 ﻿namespace StbImageSharp
 {
-	public class AnimatedFrameResult : ImageResult
+#if !STBSHARP_INTERNAL
+	public
+#else
+	internal
+#endif
+	class AnimatedFrameResult : ImageResult
 	{
 		public int Delay
 		{

@@ -2,7 +2,12 @@
 
 namespace StbImageSharp
 {
-	public static class MemoryStats
+#if !STBSHARP_INTERNAL
+	public
+#else
+	internal
+#endif
+	static class MemoryStats
 	{
 		private static int _allocations;
 

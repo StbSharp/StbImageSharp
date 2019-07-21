@@ -3,7 +3,12 @@ using System.Runtime.InteropServices;
 
 namespace StbImageSharp
 {
-	public static unsafe partial class StbImage
+#if !STBSHARP_INTERNAL
+	public
+#else
+	internal
+#endif
+	static unsafe partial class StbImage
 	{
 		public static string LastError;
 

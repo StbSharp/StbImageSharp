@@ -5,7 +5,12 @@ using System.Runtime.InteropServices;
 
 namespace StbImageSharp
 {
-	public unsafe class ImageStreamLoader
+#if !STBSHARP_INTERNAL
+	public
+#else
+	internal
+#endif
+	unsafe class ImageStreamLoader
 	{
 		private Stream _stream;
 		private byte[] _buffer = new byte[1024];

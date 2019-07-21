@@ -63,3 +63,9 @@ BitmapData bmpData = bmp.LockBits(new Rectangle(0, 0, _loadedImage.Width, _loade
 Marshal.Copy(data, 0, bmpData.Scan0, bmpData.Stride*bmp.Height);
 bmp.UnlockBits(bmpData);
 ```
+
+# License
+Public Domain
+
+# Credits
+* [stb](https://github.com/nothings/stb)

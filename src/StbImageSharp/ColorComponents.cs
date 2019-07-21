@@ -1,6 +1,11 @@
 ﻿namespace StbImageSharp
 {
-	public enum ColorComponents
+#if !STBSHARP_INTERNAL
+	public
+#else
+	internal
+#endif
+	enum ColorComponents
 	{
 		Default,
 		Grey,
