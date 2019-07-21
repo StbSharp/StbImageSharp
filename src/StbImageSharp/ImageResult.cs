@@ -1,10 +1,14 @@
 ﻿using System;
-using System.IO;
 using System.Runtime.InteropServices;
 
 namespace StbImageSharp
 {
-	public class ImageResult
+#if !STBSHARP_INTERNAL
+	public
+#else
+	internal
+#endif
+	class ImageResult
 	{
 		public int Width { get; set; }
 		public int Height { get; set; }
