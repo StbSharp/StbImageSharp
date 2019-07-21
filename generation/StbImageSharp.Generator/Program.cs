@@ -209,7 +209,7 @@ namespace StbSharp.StbImage.Generator
 				"stbi__build_fast_ac(short[] fast_ac, stbi__huffman h)");
 
 
-			File.WriteAllText(@"..\..\..\..\..\src\StbImageSharp\StbImageSharp.Generated.cs", data);
+			File.WriteAllText(@"..\..\..\..\..\src\StbImageSharp\StbImage.Generated.cs", data);
 		}
 
 		static void Main(string[] args)
