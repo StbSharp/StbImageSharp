@@ -36,7 +36,7 @@ using (Stream stream = File.Open(path, FileMode.Open))
 }
 ```
 
-Or 'ImageResult.FromMemory' method wraps 'stbi_load_from_memory':
+'ImageResult.FromMemory' method wraps 'stbi_load_from_memory':
 ```c# 
 byte[] buffer = File.ReadAllBytes(path);
 ImageResult image = ImageResult.FromMemory(buffer, ColorComponents.RedGreenBlueAlpha);
