@@ -7,6 +7,15 @@ It is important to note, that this project is **port**(not **wrapper**). Origina
 
 The porting hasn't been done by hand, but using [Sichem](https://github.com/rds1983/Sichem), which is the C to C# code converter utility.
 
+# Adding Reference
+There are two ways of referencing StbImageSharp in the project:
+1. Through nuget: `install-package StbImageSharp`
+2. As submodule:
+    
+    a. `git submodule add https://github.com/StbSharp/StbImageSharp.git`
+    
+    b. Either add StbImageSharp/src/StbImageSharp/StbImageSharp.csproj to the solution, or include *.cs from StbImageSharp/src/StbImageSharp directly in the project. In the latter case, it may make sense to add STBSHARP_INTERNAL build compilation symbol to the project, so StbImageSharp classes would become internal.
+     
 # Usage
 StbImageSharp exposes API similar to stb_image.h. However that API is complicated and deals with raw unsafe pointers.
 
