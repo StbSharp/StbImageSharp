@@ -15,6 +15,7 @@ There are two ways of referencing StbImageSharp in the project:
     a. `git submodule add https://github.com/StbSharp/StbImageSharp.git`
     
     b. Now there are two options:
+       
        * Add StbImageSharp/src/StbImageSharp/StbImageSharp.csproj to the solution
        
        * Include *.cs from StbImageSharp/src/StbImageSharp directly in the project. In this case, it may make sense to add STBSHARP_INTERNAL build compilation symbol to the project, so StbImageSharp classes would become internal.
