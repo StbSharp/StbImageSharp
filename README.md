@@ -80,5 +80,8 @@ bmp.UnlockBits(bmpData);
 # License
 Public Domain
 
+# Use cases
+[MonoGame](http://www.monogame.net/) uses StbImageSharp for Texture2D.FromStream
+
 # Credits
 * [stb](https://github.com/nothings/stb)
