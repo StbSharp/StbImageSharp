@@ -87,7 +87,7 @@ It goes through every image file in the specified folder and tries to load it 10
 
 I've used it over following set of images: https://github.com/StbSharp/TestImages
 
-The byte-wise comprarison results are similar for both methods(except a few 16-bit PNGs and PSDs that arent supported yet by StbImageLib).
+The byte-wise comprarison results are similar for both methods.
 
 And performance comparison results are:
 ```
