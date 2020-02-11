@@ -81,9 +81,9 @@ bmp.UnlockBits(bmpData);
 [MonoGame](http://www.monogame.net/) uses StbImageSharp for Texture2D.FromStream
 
 # Reliability & Performance
-This repo contains special app that was written to measure reliability & performance of StbImageJava in comparison to the original stb_image.h: https://github.com/StbSharp/StbImageSharp/tree/master/tests/StbImageSharp.Testing
+This repo contains special app that was written to measure reliability & performance of StbImageSharp in comparison to the original stb_image.h: https://github.com/StbSharp/StbImageSharp/tree/master/tests/StbImageSharp.Testing
 
-It goes through every image file in the specified folder and tries to load it 10 times with StbImageJava, then 10 times with C++/CLI wrapper over theoriginal stb_image.h(Stb.Native). Then it compares whether the results are byte-wise similar and also calculates loading times. Also it sums up and reports loading times for each method.
+It goes through every image file in the specified folder and tries to load it 10 times with StbImageSharp, then 10 times with C++/CLI wrapper over the original stb_image.h(Stb.Native). Then it compares whether the results are byte-wise similar and also calculates loading times. Also it sums up and reports loading times for each method.
 
 I've used it over following set of images: https://github.com/StbSharp/TestImages
 
@@ -91,8 +91,8 @@ The byte-wise comprarison results are similar for both methods(except a few 16-b
 
 And performance comparison results are:
 ```
-9 -- Total StbSharp Loading From memory Time: 59220 ms
-9 -- Total Stb.Native Loading From memory Time: 36497 ms
+11 -- Total StbSharp Loading From memory Time: 50630 ms
+11 -- Total Stb.Native Loading From memory Time: 39598 ms
 ```
 
 # License
