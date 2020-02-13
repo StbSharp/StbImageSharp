@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Runtime.InteropServices;
 
 namespace StbImageSharp
@@ -14,12 +15,6 @@ namespace StbImageSharp
 
 		public const int STBI__ZFAST_BITS = 9;
 
-		public delegate int ReadCallback(void* user, sbyte* data, int size);
-
-		public delegate int SkipCallback(void* user, int n);
-
-		public delegate int EofCallback(void* user);
-
 		public delegate void idct_block_kernel(byte* output, int out_stride, short* data);
 
 		public delegate void YCbCr_to_RGB_kernel(
@@ -30,41 +25,26 @@ namespace StbImageSharp
 		public static string stbi__g_failure_reason;
 		public static int stbi__vertically_flip_on_load;
 
-		public class stbi_io_callbacks
-		{
-			public ReadCallback read;
-			public SkipCallback skip;
-			public EofCallback eof;
-		}
-
-		public class stbi__context: IDisposable
+		public class stbi__context
 		{
 			public uint img_x = 0;
 			public uint img_y = 0;
 			public int img_n = 0;
 			public int img_out_n = 0;
-			public stbi_io_callbacks io = new stbi_io_callbacks();
-			public void* io_user_data;
-			public int read_from_callbacks = 0;
-			public int buflen = 0;
-			public byte* buffer_start = (byte *)CRuntime.malloc(128);
-			public byte* img_buffer;
-			public byte* img_buffer_end;
-			public byte* img_buffer_original;
-			public byte* img_buffer_original_end;
 
-			~stbi__context()
+			public Stream Stream
 			{
-				Dispose();
+				get; private set;
 			}
 
-			public void Dispose()
+			public stbi__context(Stream stream)
 			{
-				if (buffer_start != null)
+				if (stream == null)
 				{
-					CRuntime.free(buffer_start);
-					buffer_start = null;
+					throw new ArgumentNullException(nameof(stream));
 				}
+
+				Stream = stream;
 			}
 		}
 
@@ -95,12 +75,12 @@ namespace StbImageSharp
 
 			public readonly short[][] fast_ac;
 
-// sizes for components, interleaved MCUs
+			// sizes for components, interleaved MCUs
 			public int img_h_max, img_v_max;
 			public int img_mcu_x, img_mcu_y;
 			public int img_mcu_w, img_mcu_h;
 
-// definition of jpeg image component
+			// definition of jpeg image component
 			public img_comp[] img_comp = new img_comp[4];
 
 			public uint code_buffer; // jpeg entropy-coded buffer
@@ -122,7 +102,7 @@ namespace StbImageSharp
 			public int[] order = new int[4];
 			public int restart_interval, todo;
 
-// kernels
+			// kernels
 			public idct_block_kernel idct_block_kernel;
 			public YCbCr_to_RGB_kernel YCbCr_to_RGB_kernel;
 			public Resampler resample_row_hv_2_kernel;
@@ -146,7 +126,7 @@ namespace StbImageSharp
 					fast_ac[i] = new short[1 << STBI__ZFAST_BITS];
 				}
 
-				dequant = new ushort [4][];
+				dequant = new ushort[4][];
 				for (var i = 0; i < dequant.Length; ++i)
 				{
 					dequant[i] = new ushort[64];
@@ -174,7 +154,7 @@ namespace StbImageSharp
 			public byte suffix;
 		}
 
-		public class stbi__gif: IDisposable
+		public class stbi__gif : IDisposable
 		{
 			public int w;
 			public int h;
@@ -204,8 +184,8 @@ namespace StbImageSharp
 
 			public stbi__gif()
 			{
-				pal = (byte*) stbi__malloc(256 * 4 * sizeof(byte));
-				lpal = (byte*) stbi__malloc(256 * 4 * sizeof(byte));
+				pal = (byte*)stbi__malloc(256 * 4 * sizeof(byte));
+				lpal = (byte*)stbi__malloc(256 * 4 * sizeof(byte));
 			}
 
 			~stbi__gif()
@@ -237,12 +217,12 @@ namespace StbImageSharp
 
 		private static void* stbi__malloc(int size)
 		{
-			return CRuntime.malloc((ulong) size);
+			return CRuntime.malloc((ulong)size);
 		}
 
 		private static void* stbi__malloc(ulong size)
 		{
-			return stbi__malloc((int) size);
+			return stbi__malloc((int)size);
 		}
 
 		private static int stbi__err(string str)
@@ -259,8 +239,48 @@ namespace StbImageSharp
 				pal[i * 4 + 2] = stbi__get8(s);
 				pal[i * 4 + 1] = stbi__get8(s);
 				pal[i * 4] = stbi__get8(s);
-				pal[i * 4 + 3] = (byte) (transp == i ? 0 : 255);
+				pal[i * 4 + 3] = (byte)(transp == i ? 0 : 255);
 			}
+		}
+
+		public static byte stbi__get8(stbi__context s)
+		{
+			int b = s.Stream.ReadByte();
+			if (b == -1)
+			{
+				throw new Exception("EOF");
+			}
+
+			return (byte)b;
+		}
+
+		public static void stbi__skip(stbi__context s, int skip)
+		{
+			s.Stream.Seek(skip, SeekOrigin.Current);
+		}
+
+		public static void stbi__rewind(stbi__context s)
+		{
+			s.Stream.Seek(0, SeekOrigin.Begin);
+		}
+
+		public static int stbi__at_eof(stbi__context s)
+		{
+			return s.Stream.Position == s.Stream.Length ? 1 : 0;
+		}
+
+		public static int stbi__getn(stbi__context s, byte* buf, int size)
+		{
+			int result = s.Stream.Position + size < s.Stream.Length ? size :
+				(int)(s.Stream.Length - s.Stream.Position);
+
+			byte* ptr = buf;
+			for (var i = 0; i < result; ++i)
+			{
+				*ptr++ = (byte)s.Stream.ReadByte();
+			}
+
+			return result;
 		}
 	}
 }

@@ -1,93 +1,127 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using Sichem;
 
 namespace StbSharp.StbImage.Generator
 {
 	class Program
 	{
-		static void Process()
+		private static readonly Dictionary<string, string[]> _outputs = new Dictionary<string, string[]>
 		{
-			var parameters = new ConversionParameters
+			["Bmp"] = new string[]
 			{
-				InputPath = @"stb_image.h",
-				ConversionMode = ConversionMode.SingleString,
-				Defines = new[]
+				"stbi__bmp",
+			},
+			["Gif"] = new string[]
+			{
+				"stbi__gif",
+				"stbi__load_gif",
+				"stbi__process_gif",
+			},
+			["Jpg"] = new string[]
+			{
+				"stbi__resample",
+				"stbi__huffman",
+				"STBI__ZFAST_BITS",
+				"stbi__bmask",
+				"stbi__jbias",
+				"stbi__jpeg_dezigzag",
+				"stbi__build_huffman",
+				"stbi__build_fast_ac",
+				"resample_row",
+				"stbi__idct",
+				"stbi__jpeg",
+				"stbi__YCbCr",
+			},
+			["Png"] = new string[]
+			{
+				"STBI__F",
+				"stbi__png",
+				"first_row",
+				"stbi__depth_scale",
+				"png_sig",
+				"stbi__check_png",
+				"stbi__get_chunk_header",
+			},
+			["Tga"] = new string[]
+			{
+				"stbi__tga"
+			},
+			["Zlib"] = new string[]
+			{
+				"stbi__zhuffman",
+				"stbi__zlength",
+				"stbi__zdist",
+				"stbi__zdefault",
+				"length_dezigzag",
+				"stbi__zbuild",
+				"stbi_zlib",
+				"stbi__zbuf"
+			},
+			["Psd"] = new string[]
+			{
+				"stbi__psd_decode_rle",
+				"stbi__psd"
+			}
+		};
+
+		private static void Write(Dictionary<string, string> input, Dictionary<string, string> output)
+		{
+			foreach (var pair in input)
+			{
+				string outputKey = null;
+				foreach (var pair2 in _outputs)
 				{
-						"STBI_NO_SIMD",
-						"STBI_NO_LINEAR",
-						"STBI_NO_HDR",
-						"STBI_NO_PIC",
-						"STBI_NO_PNM",
-						"STBI_NO_STDIO",
-						"STB_IMAGE_IMPLEMENTATION",
-					},
-				Namespace = "StbImageSharp",
-				Class = "StbImage",
-				SkipStructs = new[]
-				{
-						"stbi_io_callbacks",
-						"stbi__context",
-						"img_comp",
-						"stbi__jpeg",
-						"stbi__resample",
-						"stbi__gif_lzw",
-						"stbi__gif"
-					},
-				SkipGlobalVariables = new[]
-				{
-						"stbi__g_failure_reason",
-						"stbi__vertically_flip_on_load"
-					},
-				SkipFunctions = new[]
-				{
-						"stbi__malloc",
-						"stbi_image_free",
-						"stbi_failure_reason",
-						"stbi__err",
-						"stbi_is_hdr_from_memory",
-						"stbi_is_hdr_from_callbacks",
-						"stbi__pnm_isspace",
-						"stbi__pnm_skip_whitespace",
-						"stbi__pic_is4",
-						"stbi__gif_parse_colortable"
-					},
-				Classes = new[]
-				{
-						"stbi_io_callbacks",
-						"stbi__jpeg",
-						"stbi__resample",
-						"stbi__gif",
-						"stbi__context",
-						"stbi__huffman",
-						"stbi__png"
-					},
-				GlobalArrays = new[]
-				{
-						"stbi__bmask",
-						"stbi__jbias",
-						"stbi__jpeg_dezigzag",
-						"stbi__zlength_base",
-						"stbi__zlength_extra",
-						"stbi__zdist_base",
-						"stbi__zdist_extra",
-						"first_row_filter",
-						"stbi__depth_scale_table",
-						"stbi__zdefault_length",
-						"stbi__zdefault_distance",
-						"length_dezigzag",
-						"png_sig"
+					foreach (var prefix in pair2.Value)
+					{
+						if (pair.Key.StartsWith(prefix))
+						{
+							outputKey = pair2.Key;
+							goto found;
+						}
 					}
-			};
+				}
+				found:
+				;
 
-			var cp = new ClangParser();
+				if (outputKey == null)
+				{
+					if (pair.Value.Contains("(stbi__jpeg "))
+					{
+						outputKey = "Jpg";
+					}
+					else if (pair.Value.Contains("(stbi__zbuf"))
+					{
+						outputKey = "Zlib";
+					}
+					else if (pair.Value.Contains("(stbi__png "))
+					{
+						outputKey = "Png";
+					}
+					else if (pair.Value.Contains("(stbi__gif "))
+					{
+						outputKey = "Gif";
+					}
+				}
 
-			cp.Process(parameters);
-			var data = cp.StringResult;
+				if (outputKey == null)
+				{
+					outputKey = "Common";
+				}
 
-			// Post processing
-			Logger.Info("Post processing...");
+				if (!output.ContainsKey(outputKey))
+				{
+					output[outputKey] = string.Empty;
+				}
 
+				output[outputKey] += pair.Value;
+			}
+		}
+
+		private static string PostProcess(string data)
+		{
 			data = Utility.ReplaceNativeCalls(data);
 
 			data = data.Replace("(int)(a <= 2147483647 - b)", "(a <= 2147483647 - b)?1:0");
@@ -208,8 +242,134 @@ namespace StbSharp.StbImage.Generator
 			data = data.Replace("stbi__build_fast_ac(short* fast_ac, stbi__huffman h)",
 				"stbi__build_fast_ac(short[] fast_ac, stbi__huffman h)");
 
+			return data;
+		}
 
-			File.WriteAllText(@"..\..\..\..\..\src\StbImageSharp\StbImage.Generated.cs", data);
+		static void Process()
+		{
+			var parameters = new ConversionParameters
+			{
+				InputPath = @"stb_image.h",
+				Defines = new[]
+				{
+						"STBI_NO_SIMD",
+						"STBI_NO_LINEAR",
+						"STBI_NO_HDR",
+						"STBI_NO_PIC",
+						"STBI_NO_PNM",
+						"STBI_NO_STDIO",
+						"STB_IMAGE_IMPLEMENTATION",
+					},
+				Namespace = "StbImageSharp",
+				Class = "StbImage",
+				SkipStructs = new[]
+				{
+						"stbi_io_callbacks",
+						"stbi__context",
+						"img_comp",
+						"stbi__jpeg",
+						"stbi__resample",
+						"stbi__gif_lzw",
+						"stbi__gif"
+					},
+				SkipGlobalVariables = new[]
+				{
+						"stbi__g_failure_reason",
+						"stbi__vertically_flip_on_load"
+					},
+				SkipFunctions = new[]
+				{
+						"stbi__malloc",
+						"stbi_image_free",
+						"stbi_failure_reason",
+						"stbi__err",
+						"stbi_is_hdr_from_memory",
+						"stbi_is_hdr_from_callbacks",
+						"stbi__pnm_isspace",
+						"stbi__pnm_skip_whitespace",
+						"stbi__pic_is4",
+						"stbi__gif_parse_colortable",
+						"stbi__start_mem",
+						"stbi__start_callbacks",
+						"stbi__rewind",
+						"stbi_load_16_from_callbacks",
+						"stbi_load_from_callbacks",
+						"stbi__get8",
+						"stbi__refill_buffer",
+						"stbi__at_eof",
+						"stbi__skip",
+						"stbi__getn",
+						"stbi_load_16_from_memory",
+						"stbi_load_from_memory",
+						"stbi_load_gif_from_memory",
+						"stbi_info_from_memory",
+						"stbi_info_from_callbacks",
+						"stbi_is_16_bit_from_memory",
+						"stbi_is_16_bit_from_callbacks"
+					},
+				Classes = new[]
+				{
+						"stbi_io_callbacks",
+						"stbi__jpeg",
+						"stbi__resample",
+						"stbi__gif",
+						"stbi__context",
+						"stbi__huffman",
+						"stbi__png"
+					},
+				GlobalArrays = new[]
+				{
+						"stbi__bmask",
+						"stbi__jbias",
+						"stbi__jpeg_dezigzag",
+						"stbi__zlength_base",
+						"stbi__zlength_extra",
+						"stbi__zdist_base",
+						"stbi__zdist_extra",
+						"first_row_filter",
+						"stbi__depth_scale_table",
+						"stbi__zdefault_length",
+						"stbi__zdefault_distance",
+						"length_dezigzag",
+						"png_sig"
+					}
+			};
+
+			var cp = new ClangParser();
+
+			var result = cp.Process(parameters);
+
+			// Post processing
+			Logger.Info("Post processing...");
+
+			var outputFiles = new Dictionary<string, string>();
+			Write(result.Constants, outputFiles);
+			Write(result.GlobalVariables, outputFiles);
+			Write(result.Enums, outputFiles);
+			Write(result.Structs, outputFiles);
+			Write(result.Methods, outputFiles);
+
+			foreach (var pair in outputFiles)
+			{
+				var data = PostProcess(pair.Value);
+
+				var sb = new StringBuilder();
+				sb.AppendLine(string.Format("// Generated by Sichem at {0}", DateTime.Now));
+				sb.AppendLine();
+
+				sb.AppendLine("using System;");
+				sb.AppendLine("using System.Runtime.InteropServices;");
+
+				sb.AppendLine();
+
+				sb.Append("namespace StbImageSharp\n{\n\t");
+				sb.AppendLine("unsafe partial class StbImage\n\t{");
+
+				data = sb.ToString() + data;
+				data += "}\n}";
+
+				File.WriteAllText(@"..\..\..\..\..\src\StbImageSharp\StbImage.Generated." + pair.Key + ".cs", data);
+			}
 		}
 
 		static void Main(string[] args)

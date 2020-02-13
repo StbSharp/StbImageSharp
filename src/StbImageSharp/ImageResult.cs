@@ -1,5 +1,7 @@
 ﻿using System;
+using System.IO;
 using System.Runtime.InteropServices;
+using static StbImageSharp.StbImage;
 
 namespace StbImageSharp
 {
@@ -38,17 +40,17 @@ namespace StbImageSharp
 			return image;
 		}
 
-		public unsafe static ImageResult FromMemory(byte[] bytes, ColorComponents requiredComponents = ColorComponents.Default)
+		public static unsafe ImageResult FromStream(Stream stream, ColorComponents requiredComponents = ColorComponents.Default)
 		{
 			byte* result = null;
 
 			try
 			{
 				int x, y, comp;
-				fixed (byte* b = bytes)
-				{
-					result = StbImage.stbi_load_from_memory(b, bytes.Length, &x, &y, &comp, (int)requiredComponents);
-				}
+
+				var context = new stbi__context(stream);
+
+				result = stbi__load_and_postprocess_8bit(context, &x, &y, &comp, (int)requiredComponents);
 
 				return FromResult(result, x, y, (ColorComponents)comp, requiredComponents);
 			}
@@ -58,6 +60,14 @@ namespace StbImageSharp
 				{
 					CRuntime.free(result);
 				}
+			}
+		}
+
+		public static ImageResult FromMemory(byte[] data, ColorComponents requiredComponents = ColorComponents.Default)
+		{
+			using (var stream = new MemoryStream(data))
+			{
+				return FromStream(stream, requiredComponents);
 			}
 		}
 	}

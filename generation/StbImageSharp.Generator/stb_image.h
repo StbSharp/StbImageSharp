@@ -4082,9 +4082,10 @@ static int stbi__parse_huffman_block(stbi__zbuf *a)
    }
 }
 
+static const stbi_uc length_dezigzag[19] = { 16,17,18,0,8,7,9,6,10,5,11,4,12,3,13,2,14,1,15 };
+
 static int stbi__compute_huffman_codes(stbi__zbuf *a)
 {
-   static const stbi_uc length_dezigzag[19] = { 16,17,18,0,8,7,9,6,10,5,11,4,12,3,13,2,14,1,15 };
    stbi__zhuffman z_codelength;
    stbi_uc lencodes[286+32+137];//padding for maximum single op
    stbi_uc codelength_sizes[19];
@@ -4341,9 +4342,9 @@ static stbi__pngchunk stbi__get_chunk_header(stbi__context *s)
    return c;
 }
 
+static const stbi_uc png_sig[8] = { 137,80,78,71,13,10,26,10 };
 static int stbi__check_png_header(stbi__context *s)
 {
-   static const stbi_uc png_sig[8] = { 137,80,78,71,13,10,26,10 };
    int i;
    for (i=0; i < 8; ++i)
       if (stbi__get8(s) != png_sig[i]) return stbi__err("bad png sig","Not a PNG");
@@ -5091,16 +5092,17 @@ static int stbi__bitcount(unsigned int a)
 // extract an arbitrarily-aligned N-bit value (N=bits)
 // from v, and then make it 8-bits long and fractionally
 // extend it to full full range.
+static unsigned int mul_table[9] = {
+   0,
+   0xff/*0b11111111*/, 0x55/*0b01010101*/, 0x49/*0b01001001*/, 0x11/*0b00010001*/,
+   0x21/*0b00100001*/, 0x41/*0b01000001*/, 0x81/*0b10000001*/, 0x01/*0b00000001*/,
+};
+static unsigned int shift_table[9] = {
+   0, 0,0,1,0,2,4,6,0,
+};
+
 static int stbi__shiftsigned(unsigned int v, int shift, int bits)
 {
-   static unsigned int mul_table[9] = {
-      0,
-      0xff/*0b11111111*/, 0x55/*0b01010101*/, 0x49/*0b01001001*/, 0x11/*0b00010001*/,
-      0x21/*0b00100001*/, 0x41/*0b01000001*/, 0x81/*0b10000001*/, 0x01/*0b00000001*/,
-   };
-   static unsigned int shift_table[9] = {
-      0, 0,0,1,0,2,4,6,0,
-   };
    if (shift < 0)
       v <<= -shift;
    else
