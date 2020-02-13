@@ -201,6 +201,7 @@ namespace StbImageSharp.Testing
 				Log("Tasks left: {0}", tasksStarted);
 
 				Log("GC Memory: {0}", GC.GetTotalMemory(true));
+				Log("Native Memory Allocations: {0}", MemoryStats.Allocations);
 			}
 		}
 

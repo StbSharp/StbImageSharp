@@ -54,8 +54,8 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Sichem\Sichem\Sichem.csproj">
-      <Project>{dcf9ccd1-4beb-46ef-96c0-386fd3f7c230}</Project>
+    <ProjectReference Include="..\..\..\Sichem\Sichem\Sichem.csproj">
+      <Project>{71352218-91c4-490e-a650-ab17c48d0300}</Project>
       <Name>Sichem</Name>
     </ProjectReference>
   </ItemGroup>
