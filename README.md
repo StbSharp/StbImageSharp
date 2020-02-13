@@ -25,21 +25,18 @@ StbImageSharp exposes API similar to stb_image.h. However that API is complicate
 
 Thus several utility classes had been made to wrap that functionality.
 
-'ImageStreamLoader' class wraps the call to 'stbi_load_from_callbacks' method.
-
-It could be used following way:
-```c#
-ImageStreamLoader loader = new ImageStreamLoader();
-using (Stream stream = File.Open(path, FileMode.Open)) 
-{
-	ImageResult image = loader.Read(stream, ColorComponents.RedGreenBlueAlpha);
-}
+'ImageResult.FromStream' loads an image from stream:
+```c# 
+  using(var stream = File.OpenRead(path))
+  {
+    ImageResult image = ImageResult.FromStream(stream, ColorComponents.RedGreenBlueAlpha);
+  }
 ```
 
-'ImageResult.FromMemory' method wraps 'stbi_load_from_memory':
+'ImageResult.FromMemory' loads an image from byte array:
 ```c# 
-byte[] buffer = File.ReadAllBytes(path);
-ImageResult image = ImageResult.FromMemory(buffer, ColorComponents.RedGreenBlueAlpha);
+  byte[] buffer = File.ReadAllBytes(path);
+  ImageResult image = ImageResult.FromMemory(buffer, ColorComponents.RedGreenBlueAlpha);
 ```
 
 Both code samples will try to load an image (JPG/PNG/BMP/TGA/PSD/GIF) located at 'path'. It'll throw Exception on failure.
