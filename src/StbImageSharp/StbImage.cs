@@ -31,6 +31,7 @@ namespace StbImageSharp
 			public uint img_y = 0;
 			public int img_n = 0;
 			public int img_out_n = 0;
+			public byte[] _tempBuffer;
 
 			public Stream Stream
 			{
@@ -271,14 +272,14 @@ namespace StbImageSharp
 
 		public static int stbi__getn(stbi__context s, byte* buf, int size)
 		{
-			int result = s.Stream.Position + size < s.Stream.Length ? size :
-				(int)(s.Stream.Length - s.Stream.Position);
-
-			byte* ptr = buf;
-			for (var i = 0; i < result; ++i)
+			if (s._tempBuffer == null ||
+				s._tempBuffer.Length < size)
 			{
-				*ptr++ = (byte)s.Stream.ReadByte();
+				s._tempBuffer = new byte[size * 2];
 			}
+
+			var result = s.Stream.Read(s._tempBuffer, 0, size);
+			Marshal.Copy(s._tempBuffer, 0, new IntPtr(buf), result);
 
 			return result;
 		}
