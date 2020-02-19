@@ -78,18 +78,22 @@ bmp.UnlockBits(bmpData);
 [MonoGame](http://www.monogame.net/) uses StbImageSharp for Texture2D.FromStream
 
 # Reliability & Performance
-This repo contains special app that was written to measure reliability & performance of StbImageSharp in comparison to the original stb_image.h: https://github.com/StbSharp/StbImageSharp/tree/master/tests/StbImageSharp.Testing
+There is special app to measure reliability & performance of StbImageSharp in comparison to the original stb_image.h: https://github.com/StbSharp/StbImageSharp/tree/master/tests/StbImageSharp.Testing
 
 It goes through every image file in the specified folder and tries to load it 10 times with StbImageSharp, then 10 times with C++/CLI wrapper over the original stb_image.h(Stb.Native). Then it compares whether the results are byte-wise similar and also calculates loading times. Also it sums up and reports loading times for each method.
 
+Moreover SixLabor ImageSharp is included in the testing too.
+
 I've used it over following set of images: https://github.com/StbSharp/TestImages
 
-The byte-wise comprarison results are similar for both methods.
+The byte-wise comprarison results are similar for StbImageSharp and Stb.Native.
 
 And performance comparison results are:
 ```
-3 -- Total StbSharp Loading From memory Time: 44090 ms
-3 -- Total Stb.Native Loading From memory Time: 34433 ms
+12 -- StbImageSharp - jpg: 12914 ms, tga: 2008 ms, bmp: 205 ms, psd: 0 ms, png: 63684 ms, Total: 78811 ms
+12 -- Stb.Native - jpg: 4526 ms, tga: 2003 ms, bmp: 98 ms, psd: 0 ms, png: 57401 ms, Total: 64028 ms
+12 -- ImageSharp - jpg: 99045 ms, bmp: 33 ms, png: 54489 ms, Total: 153567 ms
+12 -- Total files processed - jpg: 170, tga: 41, bmp: 7, psd: 1, png: 568, Total: 787
 ```
 
 # License
