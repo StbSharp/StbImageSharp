@@ -221,24 +221,27 @@ namespace StbImageSharp.Testing
 
 				match = true;
 
-				var imageSharpResult = ParseTest(
-					"ImageSharp",
-					(out int x, out int y, out ColorComponents ccomp) =>
-					{
-						using (Image<Rgba32> image = Image.Load(data))
+				if (extension != "tga" && extension != "psd" && extension != "pic")
+				{
+					var imageSharpResult = ParseTest(
+						"ImageSharp",
+						(out int x, out int y, out ColorComponents ccomp) =>
 						{
-							x = image.Width;
-							y = image.Height;
-							ccomp = ColorComponents.Default;
+							using (Image<Rgba32> image = Image.Load(data))
+							{
+								x = image.Width;
+								y = image.Height;
+								ccomp = ColorComponents.Default;
 
-							return MemoryMarshal.AsBytes(image.GetPixelSpan()).ToArray();
+								return MemoryMarshal.AsBytes(image.GetPixelSpan()).ToArray();
+							}
 						}
-					}
-				);
+					);
+					imageSharpTotal.Add(extension, imageSharpResult.TimeInMs);
+				}
 
 				stbImageSharpTotal.Add(extension, stbImageSharpResult.TimeInMs);
 				stbNativeTotal.Add(extension, stbNativeResult.TimeInMs);
-				imageSharpTotal.Add(extension, imageSharpResult.TimeInMs);
 			}
 			catch (Exception ex)
 			{
@@ -257,8 +260,8 @@ namespace StbImageSharp.Testing
 				Log("StbImageSharp - {0}", stbImageSharpTotal.BuildString());
 				Log("Stb.Native - {0}", stbNativeTotal.BuildString());
 				Log("ImageSharp - {0}", imageSharpTotal.BuildString());
+				Log("Total files processed - {0}", stbImageSharpTotal.BuildStringCount());
 				Log("StbImageSharp/Stb.Native matches/processed - {0}/{1}", filesMatches, filesProcessed);
-				Log("Total files processed - {0}", imageSharpTotal.BuildStringCount());
 				Log("Tasks left - {0}", tasksStarted);
 				Log("GC Memory - {0}", GC.GetTotalMemory(true));
 				Log("Native Memory Allocations - {0}", MemoryStats.Allocations);
