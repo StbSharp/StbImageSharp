@@ -12,18 +12,32 @@ namespace StbImageSharp
 #endif
 	class ImageResult
 	{
-		public int Width { get; set; }
-		public int Height { get; set; }
-		public ColorComponents SourceComp { get; set; }
-		public ColorComponents Comp { get; set; }
-		public byte[] Data { get; set; }
+		public int Width
+		{
+			get; set;
+		}
+		public int Height
+		{
+			get; set;
+		}
+		public ColorComponents SourceComp
+		{
+			get; set;
+		}
+		public ColorComponents Comp
+		{
+			get; set;
+		}
+		public byte[] Data
+		{
+			get; set;
+		}
 
-		internal unsafe static ImageResult FromResult(byte* result, int width, int height, ColorComponents comp, ColorComponents req_comp)
+		internal static unsafe ImageResult FromResult(byte* result, int width, int height, ColorComponents comp,
+			ColorComponents req_comp)
 		{
 			if (result == null)
-			{
-				throw new InvalidOperationException(StbImage.LastError);
-			}
+				throw new InvalidOperationException(LastError);
 
 			var image = new ImageResult
 			{
@@ -40,7 +54,8 @@ namespace StbImageSharp
 			return image;
 		}
 
-		public static unsafe ImageResult FromStream(Stream stream, ColorComponents requiredComponents = ColorComponents.Default)
+		public static unsafe ImageResult FromStream(Stream stream,
+			ColorComponents requiredComponents = ColorComponents.Default)
 		{
 			byte* result = null;
 
@@ -57,9 +72,7 @@ namespace StbImageSharp
 			finally
 			{
 				if (result != null)
-				{
 					CRuntime.free(result);
-				}
 			}
 		}
 
