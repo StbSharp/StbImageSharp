@@ -88,7 +88,7 @@ I've used it over following set of images: https://github.com/StbSharp/TestImage
 
 The byte-wise comprarison results are similar for StbImageSharp and Stb.Native.
 
-And performance comparison results are:
+And performance comparison results are(times are total loading times):
 ```
 12 -- StbImageSharp - jpg: 12914 ms, tga: 2008 ms, bmp: 205 ms, psd: 0 ms, png: 63684 ms, Total: 78811 ms
 12 -- Stb.Native - jpg: 4526 ms, tga: 2003 ms, bmp: 98 ms, psd: 0 ms, png: 57401 ms, Total: 64028 ms
