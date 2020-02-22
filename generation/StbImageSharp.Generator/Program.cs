@@ -368,7 +368,7 @@ namespace StbSharp.StbImage.Generator
 				data = sb.ToString() + data;
 				data += "}\n}";
 
-				File.WriteAllText(@"..\..\..\..\..\src\StbImageSharp\StbImage.Generated." + pair.Key + ".cs", data);
+				File.WriteAllText(@"..\..\..\..\..\src\StbImage.Generated." + pair.Key + ".cs", data);
 			}
 		}
 
