@@ -233,7 +233,10 @@ namespace StbImageSharp.Testing
 								y = image.Height;
 								ccomp = ColorComponents.Default;
 
-								return MemoryMarshal.AsBytes(image.GetPixelSpan()).ToArray();
+								Span<Rgba32> span;
+								image.TryGetSinglePixelSpan(out span);
+
+								return MemoryMarshal.AsBytes(span).ToArray();
 							}
 						}
 					);
