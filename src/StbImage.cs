@@ -245,7 +245,9 @@ namespace StbImageSharp
 		{
 			var b = s.Stream.ReadByte();
 			if (b == -1)
-				throw new Exception("EOF");
+			{
+				return 0;
+			}
 
 			return (byte)b;
 		}
