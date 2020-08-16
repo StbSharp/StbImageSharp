@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.InteropServices;
-using static StbImageSharp.StbImage;
 
 namespace StbImageSharp
 {
@@ -37,7 +36,7 @@ namespace StbImageSharp
 			ColorComponents req_comp)
 		{
 			if (result == null)
-				throw new InvalidOperationException(LastError);
+				throw new InvalidOperationException(StbImage.LastError);
 
 			var image = new ImageResult
 			{
@@ -63,9 +62,9 @@ namespace StbImageSharp
 			{
 				int x, y, comp;
 
-				var context = new stbi__context(stream);
+				var context = new StbImage.stbi__context(stream);
 
-				result = stbi__load_and_postprocess_8bit(context, &x, &y, &comp, (int)requiredComponents);
+				result = StbImage.stbi__load_and_postprocess_8bit(context, &x, &y, &comp, (int)requiredComponents);
 
 				return FromResult(result, x, y, (ColorComponents)comp, requiredComponents);
 			}

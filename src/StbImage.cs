@@ -27,6 +27,8 @@ namespace StbImageSharp
 
 		public class stbi__context
 		{
+			private readonly Stream _stream;
+
 			public byte[] _tempBuffer;
 			public int img_n = 0;
 			public int img_out_n = 0;
@@ -36,14 +38,17 @@ namespace StbImageSharp
 			public stbi__context(Stream stream)
 			{
 				if (stream == null)
-					throw new ArgumentNullException(nameof(stream));
+					throw new ArgumentNullException("stream");
 
-				Stream = stream;
+				_stream = stream;
 			}
 
 			public Stream Stream
 			{
-				get;
+				get
+				{
+					return _stream;
+				}
 			}
 		}
 

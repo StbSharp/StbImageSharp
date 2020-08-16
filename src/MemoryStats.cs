@@ -5,13 +5,19 @@ namespace StbImageSharp
 #if !STBSHARP_INTERNAL
 	public
 #else
-	internal
+    internal
 #endif
 	static class MemoryStats
 	{
 		private static int _allocations;
 
-		public static int Allocations => _allocations;
+		public static int Allocations
+		{
+			get
+			{
+				return _allocations;
+			}
+		}
 
 		internal static void Allocated()
 		{
