@@ -75,7 +75,8 @@ bmp.UnlockBits(bmpData);
 ```
 
 # Who uses it?
-[MonoGame](http://www.monogame.net/) uses StbImageSharp for Texture2D.FromStream
+[MonoGame](http://www.monogame.net/)
+[TriLib 2.0](https://ricardoreis.net/?p=778)
 
 # Reliability & Performance
 There is special app to measure reliability & performance of StbImageSharp in comparison to the original stb_image.h: https://github.com/StbSharp/StbImageSharp/tree/master/tests/StbImageSharp.Testing
