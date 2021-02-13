@@ -1,7 +1,7 @@
 # StbImageSharp
 [![NuGet](https://img.shields.io/nuget/v/StbImageSharp.svg)](https://www.nuget.org/packages/StbImageSharp/) [![Build status](https://ci.appveyor.com/api/projects/status/c9eh0e4c70ki26fy?svg=true)](https://ci.appveyor.com/project/RomanShapiro/stbimagesharp) [![Chat](https://img.shields.io/discord/628186029488340992.svg)](https://discord.gg/ZeHxhCY)
 
-StbImageSharp is C# port of the stb_image.h, which is C library to load images in JPG, PNG, BMP, TGA, PSD and GIF formats.
+StbImageSharp is C# port of the stb_image.h, which is C library to load images in JPG, PNG, BMP, TGA, PSD, GIF and HDR formats.
 
 It is important to note, that this project is **port**(not **wrapper**). Original C code had been ported to C#. Therefore StbImageSharp doesnt require any native binaries.
 
@@ -20,7 +20,7 @@ There are two ways of referencing StbImageSharp in the project:
        
       * Include *.cs from folder "src" directly in the project. In this case, it might make sense to add STBSHARP_INTERNAL build compilation symbol to the project, so StbImageSharp classes would become internal.
      
-# Usage
+# Basic Usage
 StbImageSharp exposes API similar to stb_image.h. However that API is complicated and deals with raw unsafe pointers.
 
 Thus several utility classes had been made to wrap that functionality.
@@ -74,7 +74,17 @@ Marshal.Copy(data, 0, bmpData.Scan0, bmpData.Stride*bmp.Height);
 bmp.UnlockBits(bmpData);
 ```
 
-# Who uses it?
+# ImageInfo
+ImageInfo class could be used to obtain an image info like this:
+```c#
+  ImageInfo? info = ImageInfo.FromStream(imageStream);
+```
+It'll return null if the image type isnt supported, otherwise it'll return the image info(width, height, color components, etc).
+
+# ImageResultFloat
+ImageResultFloat class is similar to ImageResult, but stores data as array of float rathen than bytes. It is used to load HDR files.
+
+# Who uses StbImageSharp?
 [MonoGame](http://www.monogame.net/)
 
 [TriLib 2.0](https://ricardoreis.net/?p=778)
