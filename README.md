@@ -20,7 +20,7 @@ There are two ways of referencing StbImageSharp in the project:
        
       * Include *.cs from folder "src" directly in the project. In this case, it might make sense to add STBSHARP_INTERNAL build compilation symbol to the project, so StbImageSharp classes would become internal.
      
-# Basic Usage
+# Usage
 StbImageSharp exposes API similar to stb_image.h. However that API is complicated and deals with raw unsafe pointers.
 
 Thus several utility classes had been made to wrap that functionality.
@@ -74,14 +74,14 @@ Marshal.Copy(data, 0, bmpData.Scan0, bmpData.Stride*bmp.Height);
 bmp.UnlockBits(bmpData);
 ```
 
-# ImageInfo
+## ImageInfo
 ImageInfo class could be used to obtain an image info like this:
 ```c#
   ImageInfo? info = ImageInfo.FromStream(imageStream);
 ```
 It'll return null if the image type isnt supported, otherwise it'll return the image info(width, height, color components, etc).
 
-# ImageResultFloat
+## ImageResultFloat
 ImageResultFloat class is similar to ImageResult, but stores data as array of float rathen than bytes. It is used to load HDR files.
 
 # Who uses StbImageSharp?
