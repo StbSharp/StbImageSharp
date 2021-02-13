@@ -64,6 +64,10 @@ namespace StbSharp.StbImage.Generator
 			{
 				"stbi__psd_decode_rle",
 				"stbi__psd"
+			},
+			["Hdr"] = new string[]
+			{
+				"stbi__hdr"
 			}
 		};
 
@@ -103,6 +107,10 @@ namespace StbSharp.StbImage.Generator
 					else if (pair.Value.Contains("(stbi__gif "))
 					{
 						outputKey = "Gif";
+					}
+					else if (pair.Value.Contains("(stbi__hdr "))
+					{
+						outputKey = "Hdr";
 					}
 				}
 
@@ -253,8 +261,6 @@ namespace StbSharp.StbImage.Generator
 				Defines = new[]
 				{
 						"STBI_NO_SIMD",
-						"STBI_NO_LINEAR",
-						"STBI_NO_HDR",
 						"STBI_NO_PIC",
 						"STBI_NO_PNM",
 						"STBI_NO_STDIO",
@@ -305,7 +311,8 @@ namespace StbSharp.StbImage.Generator
 						"stbi_info_from_memory",
 						"stbi_info_from_callbacks",
 						"stbi_is_16_bit_from_memory",
-						"stbi_is_16_bit_from_callbacks"
+						"stbi_is_16_bit_from_callbacks",
+						"stbi__hdr_test_core"
 					},
 				Classes = new[]
 				{

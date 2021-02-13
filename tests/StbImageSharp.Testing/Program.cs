@@ -154,7 +154,7 @@ namespace StbImageSharp.Testing
 		{
 			if (!f.EndsWith(".bmp") && !f.EndsWith(".jpg") && !f.EndsWith(".png") &&
 				!f.EndsWith(".jpg") && !f.EndsWith(".psd") && !f.EndsWith(".pic") &&
-				!f.EndsWith(".tga"))
+				!f.EndsWith(".tga") && !f.EndsWith(".hdr"))
 			{
 				Interlocked.Decrement(ref tasksStarted);
 				return;
@@ -221,7 +221,7 @@ namespace StbImageSharp.Testing
 
 				match = true;
 
-				if (extension != "tga" && extension != "psd" && extension != "pic")
+				if (extension != "tga" && extension != "psd" && extension != "pic" && extension != "hdr")
 				{
 					var imageSharpResult = ParseTest(
 						"ImageSharp",

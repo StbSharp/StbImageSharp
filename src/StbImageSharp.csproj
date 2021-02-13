@@ -10,8 +10,11 @@
     <NoWarn>NU1701</NoWarn>
     <AssemblyName>StbImageSharp</AssemblyName>
     <RootNamespace>StbImageSharp</RootNamespace>
-    <Version>1.0.0.0</Version>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Version>2.22.5</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 </Project>
