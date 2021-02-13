@@ -9,7 +9,7 @@ The porting hasn't been done by hand, but using [Sichem](https://github.com/rds1
 
 # Adding Reference
 There are two ways of referencing StbImageSharp in the project:
-1. Through nuget: `install-package StbImageSharp`
+1. Through nuget: https://www.nuget.org/packages/StbImageSharp/
 2. As submodule:
     
     a. `git submodule add https://github.com/StbSharp/StbImageSharp.git`
