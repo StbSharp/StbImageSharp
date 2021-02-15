@@ -5,7 +5,7 @@
     <PackageId>StbImageSharp</PackageId>
     <TargetFrameworks>netstandard2.0;net45</TargetFrameworks>
     <Description>C# port of the stb_image.h</Description>
-    <PackageLicenseExpression>NLPL</PackageLicenseExpression>
+    <PackageLicenseUrl>Public Domain</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/StbSharp/StbImageSharp</PackageProjectUrl>
     <Version>2.22.5</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
