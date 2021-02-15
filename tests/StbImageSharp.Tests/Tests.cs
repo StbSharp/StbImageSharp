@@ -11,8 +11,41 @@ namespace StbImageSharp.Tests
 	{
 		private static readonly Assembly _assembly = typeof(Tests).Assembly;
 
-		[TestCase("sample_1280×853.hdr", 1280, 853)]
-		public void LoadHdr(string filename, int width, int height)
+		[TestCase("The Public Domain_ Enclosing the Commons of the Mind.pdf")]
+		[TestCase("empty")]
+		public void LoadUnknownFormat(string filename)
+		{
+			Assert.Throws<InvalidOperationException>(() =>
+			{
+				ImageResult result = null;
+				using (var stream = _assembly.OpenResourceStream(filename))
+				{
+					result = ImageResult.FromStream(stream, ColorComponents.RedGreenBlueAlpha);
+				}
+			});
+		}
+
+		[TestCase("sample_1280×853.hdr", 1280, 853, ColorComponents.RedGreenBlue)]
+		[TestCase("DockPanes.jpg", 609, 406, ColorComponents.RedGreenBlue)]
+		public void Load(string filename, int width, int height, ColorComponents colorComponents)
+		{
+			ImageResult result = null;
+			using (var stream = _assembly.OpenResourceStream(filename))
+			{
+				result = ImageResult.FromStream(stream, ColorComponents.RedGreenBlueAlpha);
+			}
+
+			Assert.IsNotNull(result);
+			Assert.AreEqual(result.Width, width);
+			Assert.AreEqual(result.Height, height);
+			Assert.AreEqual(result.Comp, ColorComponents.RedGreenBlueAlpha);
+			Assert.AreEqual(result.SourceComp, colorComponents);
+			Assert.IsNotNull(result.Data);
+			Assert.AreEqual(result.Data.Length, result.Width * result.Height * 4);
+		}
+
+		[TestCase("sample_1280×853.hdr", 1280, 853, ColorComponents.RedGreenBlue)]
+		public void LoadHdr(string filename, int width, int height, ColorComponents colorComponents)
 		{
 			ImageResultFloat result = null;
 			using(var stream = _assembly.OpenResourceStream(filename))
@@ -24,7 +57,7 @@ namespace StbImageSharp.Tests
 			Assert.AreEqual(result.Width, width);
 			Assert.AreEqual(result.Height, height);
 			Assert.AreEqual(result.Comp, ColorComponents.RedGreenBlueAlpha);
-			Assert.AreEqual(result.SourceComp, ColorComponents.RedGreenBlue);
+			Assert.AreEqual(result.SourceComp, colorComponents);
 			Assert.IsNotNull(result.Data);
 			Assert.AreEqual(result.Data.Length, result.Width * result.Height * 4);
 		}
