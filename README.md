@@ -86,6 +86,15 @@ It'll return null if the image type isnt supported, otherwise it'll return the i
 ## ImageResultFloat
 ImageResultFloat class is similar to ImageResult, but stores data as array of float rathen than bytes. It is used to load HDR files.
 
+## Animated Gifs
+It is possible to load all frames of animated gifs along with its delays using following code:
+```c#
+    foreach(AnimatedFrameResult frame in ImageResult.AnimatedGifFramesFromStream(stream))
+    {
+        // Do something with a frame
+    }
+```
+
 # Who uses StbImageSharp?
 [MonoGame](http://www.monogame.net/)
 
