@@ -154,8 +154,8 @@ namespace StbImageSharp
 
 		public class stbi__gif : IDisposable
 		{
-			public byte* _out_;
-			public byte* background;
+			public byte* _out_ = null;
+			public byte* background = null;
 			public int bgindex;
 			public stbi__gif_lzw* codes = (stbi__gif_lzw*)stbi__malloc(8192 * sizeof(stbi__gif_lzw));
 			public byte* color_table;
@@ -165,13 +165,13 @@ namespace StbImageSharp
 			public int eflags;
 			public int flags;
 			public int h;
-			public byte* history;
+			public byte* history = null;
 			public int lflags;
 			public int line_size;
-			public byte* lpal;
+			public byte* lpal = (byte*)stbi__malloc(256 * 4 * sizeof(byte));
 			public int max_x;
 			public int max_y;
-			public byte* pal;
+			public byte* pal = (byte*)stbi__malloc(256 * 4 * sizeof(byte));
 			public int parse;
 			public int ratio;
 			public int start_x;
@@ -179,12 +179,6 @@ namespace StbImageSharp
 			public int step;
 			public int transparent;
 			public int w;
-
-			public stbi__gif()
-			{
-				pal = (byte*)stbi__malloc(256 * 4 * sizeof(byte));
-				lpal = (byte*)stbi__malloc(256 * 4 * sizeof(byte));
-			}
 
 			public void Dispose()
 			{
@@ -204,6 +198,24 @@ namespace StbImageSharp
 				{
 					CRuntime.free(codes);
 					codes = null;
+				}
+
+				if (_out_ != null)
+				{
+					CRuntime.free(_out_);
+					_out_ = null;
+				}
+
+				if (background != null)
+				{
+					CRuntime.free(background);
+					background = null;
+				}
+
+				if (history != null)
+				{
+					CRuntime.free(history);
+					history = null;
 				}
 			}
 

@@ -52,17 +52,19 @@ namespace StbImageSharp
 
 		public static int stbi__gif_info_raw(stbi__context s, int* x, int* y, int* comp)
 		{
-			var g = new stbi__gif();
-			if (stbi__gif_header(s, g, comp, 1) == 0)
+			using (var g = new stbi__gif())
 			{
-				stbi__rewind(s);
-				return 0;
-			}
+				if (stbi__gif_header(s, g, comp, 1) == 0)
+				{
+					stbi__rewind(s);
+					return 0;
+				}
 
-			if (x != null)
-				*x = g.w;
-			if (y != null)
-				*y = g.h;
+				if (x != null)
+					*x = g.w;
+				if (y != null)
+					*y = g.h;
+			}
 
 			return 1;
 		}
@@ -360,61 +362,6 @@ namespace StbImageSharp
 						return (byte*)(ulong)(stbi__err("unknown code") != 0 ? (byte*)null : null);
 				}
 			}
-		}
-
-		public static void* stbi__load_gif_main(stbi__context s, int** delays, int* x, int* y, int* z, int* comp,
-			int req_comp)
-		{
-			if (stbi__gif_test(s) != 0)
-			{
-				var layers = 0;
-				byte* u = null;
-				byte* _out_ = null;
-				byte* two_back = null;
-				var g = new stbi__gif();
-				var stride = 0;
-				if (delays != null)
-					*delays = null;
-				do
-				{
-					u = stbi__gif_load_next(s, g, comp, req_comp, two_back);
-					if (u != null)
-					{
-						*x = g.w;
-						*y = g.h;
-						++layers;
-						stride = g.w * g.h * 4;
-						if (_out_ != null)
-						{
-							_out_ = (byte*)CRuntime.realloc(_out_, (ulong)(layers * stride));
-							if (delays != null)
-								*delays = (int*)CRuntime.realloc(*delays, (ulong)(sizeof(int) * layers));
-						}
-						else
-						{
-							_out_ = (byte*)stbi__malloc((ulong)(layers * stride));
-							if (delays != null)
-								*delays = (int*)stbi__malloc((ulong)(layers * sizeof(int)));
-						}
-
-						CRuntime.memcpy(_out_ + (layers - 1) * stride, u, (ulong)stride);
-						if (layers >= 2)
-							two_back = _out_ - 2 * stride;
-						if (delays != null)
-							(*delays)[layers - 1U] = g.delay;
-					}
-				} while (u != null);
-
-				CRuntime.free(g._out_);
-				CRuntime.free(g.history);
-				CRuntime.free(g.background);
-				if (req_comp != 0 && req_comp != 4)
-					_out_ = stbi__convert_format(_out_, 4, req_comp, (uint)(layers * g.w), (uint)g.h);
-				*z = layers;
-				return _out_;
-			}
-
-			return (byte*)(ulong)(stbi__err("not GIF") != 0 ? (byte*)null : null);
 		}
 
 		public static void* stbi__gif_load(stbi__context s, int* x, int* y, int* comp, int req_comp,

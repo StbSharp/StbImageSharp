@@ -15,13 +15,19 @@ namespace StbImageSharp.Samples.MonoGame
 		{
 			if (args.Length == 0)
 			{
-				Console.WriteLine("Usage: StbImageSharp.Viewer <path_to_image_file>");
+				Console.WriteLine("Usage: StbImageSharp.Viewer <path_to_image_file> [-animated-gif]");
 				return;
 			}
 
 			try
 			{
-				using (var game = new ViewerGame(args[0]))
+				var isAnimatedGif = false;
+				if (args.Length > 1 && args[1] == "-animated-gif")
+				{
+					isAnimatedGif = true;
+				}
+
+				using (var game = new ViewerGame(args[0], isAnimatedGif))
 					game.Run();
 			}
 			catch(Exception ex)

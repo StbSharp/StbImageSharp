@@ -7,7 +7,7 @@
     <Description>C# port of the stb_image.h</Description>
     <PackageLicenseUrl>Public Domain</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/StbSharp/StbImageSharp</PackageProjectUrl>
-    <Version>2.22.5</Version>
+    <Version>2.22.6</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   

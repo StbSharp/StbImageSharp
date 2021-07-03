@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 
@@ -81,6 +82,12 @@ namespace StbImageSharp
 			{
 				return FromStream(stream, requiredComponents);
 			}
+		}
+
+		public static IEnumerable<AnimatedFrameResult> AnimatedGifFramesFromStream(Stream stream,
+			ColorComponents requiredComponents = ColorComponents.Default)
+		{
+			return new AnimatedGifEnumerable(stream, requiredComponents);
 		}
 	}
 }

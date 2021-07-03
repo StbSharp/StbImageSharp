@@ -87,5 +87,30 @@ namespace StbImageSharp.Tests
 			Assert.AreEqual(info.ColorComponents, colorComponents);
 			Assert.AreEqual(info.BitsPerChannel, is16bit ? 16 : 8);
 		}
+
+		[TestCase("somersault.gif", 384, 480, ColorComponents.RedGreenBlueAlpha, 43)]
+		public void AnimatedGifFrames(string fileName, int width, int height, ColorComponents colorComponents, int originalFrameCount)
+		{
+			using (var stream = _assembly.OpenResourceStream(fileName))
+			{
+				var frameCount = 0;
+				foreach(var frame in ImageResult.AnimatedGifFramesFromStream(stream))
+				{
+					Assert.AreEqual(frame.Width, width);
+					Assert.AreEqual(frame.Height, height);
+					Assert.AreEqual(frame.Comp, colorComponents);
+					Assert.IsNotNull(frame.Data);
+					Assert.AreEqual(frame.Data.Length, frame.Width * frame.Height * (int)frame.Comp);
+
+					++frameCount;
+				}
+
+				Assert.AreEqual(frameCount, originalFrameCount);
+
+				stream.Seek(0, SeekOrigin.Begin);
+			}
+
+			Assert.AreEqual(MemoryStats.Allocations, 0);
+		}
 	}
 }
