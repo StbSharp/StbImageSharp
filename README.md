@@ -105,7 +105,7 @@ There is special app to measure reliability & performance of StbImageSharp in co
 
 It goes through every image file in the specified folder and tries to load it 10 times with StbImageSharp, then 10 times with C++/CLI wrapper over the original stb_image.h(Stb.Native). Then it compares whether the results are byte-wise similar and also calculates loading times. Also it sums up and reports loading times for each method.
 
-Moreover SixLabor ImageSharp 1.0.0 is included in the testing too.
+Moreover SixLabor ImageSharp 1.0.4 is included in the testing too.
 
 I've used it over following set of images: https://github.com/StbSharp/TestImages
 
