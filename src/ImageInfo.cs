@@ -15,9 +15,8 @@ namespace StbImageSharp
 		public int BitsPerChannel;
 
 
-		public unsafe static ImageInfo? FromStream(Stream stream)
+		public static unsafe ImageInfo? FromStream(Stream stream)
 		{
-
 			int width, height, comp;
 			var context = new StbImage.stbi__context(stream);
 
@@ -27,10 +26,7 @@ namespace StbImageSharp
 			var infoResult = StbImage.stbi__info_main(context, &width, &height, &comp);
 			StbImage.stbi__rewind(context);
 
-			if (infoResult == 0)
-			{
-				return null;
-			}
+			if (infoResult == 0) return null;
 
 			return new ImageInfo
 			{

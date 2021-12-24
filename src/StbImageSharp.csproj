@@ -1,17 +1,21 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <Authors>StbImageSharpTeam</Authors>
-    <Product>StbImageSharp</Product>
-    <PackageId>StbImageSharp</PackageId>
-    <TargetFrameworks>netstandard2.0;net45</TargetFrameworks>
-    <Description>C# port of the stb_image.h</Description>
-    <PackageLicenseUrl>Public Domain</PackageLicenseUrl>
-    <PackageProjectUrl>https://github.com/StbSharp/StbImageSharp</PackageProjectUrl>
-    <Version>2.22.6</Version>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
-  
-  <PropertyGroup Condition="'$(Configuration)'=='Release'">
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-  </PropertyGroup>
+    <PropertyGroup>
+        <Authors>StbImageSharpTeam</Authors>
+        <Product>StbImageSharp</Product>
+        <PackageId>StbImageSharp</PackageId>
+        <TargetFrameworks>netstandard2.0;net45</TargetFrameworks>
+        <Description>C# port of the stb_image.h</Description>
+        <PackageLicenseUrl>Public Domain</PackageLicenseUrl>
+        <PackageProjectUrl>https://github.com/StbSharp/StbImageSharp</PackageProjectUrl>
+        <Version>2.27.7</Version>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)'=='Release'">
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\Hebron\src\Hebron.Runtime\Hebron.Runtime.csproj"/>
+    </ItemGroup>
 </Project>

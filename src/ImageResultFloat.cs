@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using Hebron.Runtime;
 
 namespace StbImageSharp
 {
@@ -21,7 +22,7 @@ namespace StbImageSharp
 			ColorComponents req_comp)
 		{
 			if (result == null)
-				throw new InvalidOperationException(StbImage.LastError);
+				throw new InvalidOperationException(StbImage.stbi__g_failure_reason);
 
 			var image = new ImageResultFloat
 			{
@@ -38,7 +39,8 @@ namespace StbImageSharp
 			return image;
 		}
 
-		public static unsafe ImageResultFloat FromStream(Stream stream, ColorComponents requiredComponents = ColorComponents.Default)
+		public static unsafe ImageResultFloat FromStream(Stream stream,
+			ColorComponents requiredComponents = ColorComponents.Default)
 		{
 			float* result = null;
 
@@ -59,13 +61,13 @@ namespace StbImageSharp
 			}
 		}
 
-		public static ImageResultFloat FromMemory(byte[] data, ColorComponents requiredComponents = ColorComponents.Default)
+		public static ImageResultFloat FromMemory(byte[] data,
+			ColorComponents requiredComponents = ColorComponents.Default)
 		{
 			using (var stream = new MemoryStream(data))
 			{
 				return FromStream(stream, requiredComponents);
 			}
 		}
-
 	}
 }

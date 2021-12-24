@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
+using Hebron.Runtime;
 
 namespace StbImageSharp
 {
@@ -12,32 +13,17 @@ namespace StbImageSharp
 #endif
 	class ImageResult
 	{
-		public int Width
-		{
-			get; set;
-		}
-		public int Height
-		{
-			get; set;
-		}
-		public ColorComponents SourceComp
-		{
-			get; set;
-		}
-		public ColorComponents Comp
-		{
-			get; set;
-		}
-		public byte[] Data
-		{
-			get; set;
-		}
+		public int Width { get; set; }
+		public int Height { get; set; }
+		public ColorComponents SourceComp { get; set; }
+		public ColorComponents Comp { get; set; }
+		public byte[] Data { get; set; }
 
 		internal static unsafe ImageResult FromResult(byte* result, int width, int height, ColorComponents comp,
 			ColorComponents req_comp)
 		{
 			if (result == null)
-				throw new InvalidOperationException(StbImage.LastError);
+				throw new InvalidOperationException(StbImage.stbi__g_failure_reason);
 
 			var image = new ImageResult
 			{

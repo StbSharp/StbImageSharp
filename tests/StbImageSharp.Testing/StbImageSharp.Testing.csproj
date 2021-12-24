@@ -6,10 +6,10 @@
     <AssemblyName>StbImageSharp.Testing</AssemblyName>
     <RootNamespace>StbImageSharp.Testing</RootNamespace>
     <TargetFramework>net462</TargetFramework>
-    <Platforms>x86</Platforms>
+    <Platforms>x64</Platforms>
   </PropertyGroup>
   <ItemGroup>
-	<PackageReference Include="SixLabors.ImageSharp" Version="1.0.2" />
+	<PackageReference Include="SixLabors.ImageSharp" Version="1.0.4" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\StbImageSharp.csproj" />
