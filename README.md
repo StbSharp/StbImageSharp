@@ -113,11 +113,11 @@ The byte-wise comprarison results are similar for StbImageSharp and Stb.Native.
 
 And performance comparison results are(times are total loading times):
 ```
-28 -- StbImageSharp - bmp: 119 ms, tga: 1168 ms, png: 22549 ms, jpg: 4353 ms, psd: 1 ms, Total: 28190 ms
-28 -- Stb.Native - bmp: 36 ms, tga: 948 ms, png: 19095 ms, jpg: 2260 ms, psd: 2 ms, Total: 22341 ms
-28 -- ImageSharp - bmp: 44 ms, png: 22108 ms, jpg: 3842 ms, Total: 25994 ms
-28 -- Total files processed - bmp: 7, tga: 41, png: 568, jpg: 170, psd: 1, Total: 787
-28 -- StbImageSharp/Stb.Native matches/processed - 787/787
+3 -- StbImageSharp - bmp: 34 ms, tga: 499 ms, png: 12028 ms, jpg: 2005 ms, psd: 0 ms, Total: 14566 ms
+3 -- Stb.Native - bmp: 23 ms, tga: 401 ms, png: 10271 ms, jpg: 1419 ms, psd: 0 ms, Total: 12114 ms
+3 -- ImageSharp - bmp: 24 ms, png: 10253 ms, jpg: 1782 ms, Total: 12059 ms
+3 -- Total files processed - bmp: 7, tga: 41, png: 568, jpg: 170, psd: 1, Total: 787
+3 -- StbImageSharp/Stb.Native matches/processed - 787/787
 ```
 
 # License
