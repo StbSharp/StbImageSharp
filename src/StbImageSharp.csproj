@@ -14,8 +14,4 @@
     <PropertyGroup Condition="'$(Configuration)'=='Release'">
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     </PropertyGroup>
-
-    <ItemGroup>
-        <ProjectReference Include="..\..\Hebron\src\Hebron.Runtime\Hebron.Runtime.csproj"/>
-    </ItemGroup>
 </Project>
