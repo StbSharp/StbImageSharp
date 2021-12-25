@@ -15,8 +15,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StbImageSharp.Tests", "test
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StbImageSharp.Viewer", "tests\StbImageSharp.Viewer\StbImageSharp.Viewer.csproj", "{55726B87-1BEA-4B67-A071-A076DA1B298B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hebron.Runtime", "..\Hebron\src\Hebron.Runtime\Hebron.Runtime.csproj", "{780D26DF-0373-4B07-B016-6850667B9BE6}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,10 +41,6 @@ Global
 		{55726B87-1BEA-4B67-A071-A076DA1B298B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{55726B87-1BEA-4B67-A071-A076DA1B298B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{55726B87-1BEA-4B67-A071-A076DA1B298B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{780D26DF-0373-4B07-B016-6850667B9BE6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{780D26DF-0373-4B07-B016-6850667B9BE6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{780D26DF-0373-4B07-B016-6850667B9BE6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{780D26DF-0373-4B07-B016-6850667B9BE6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
