@@ -246,6 +246,8 @@ namespace StbImageSharp.Testing
 
 				stbImageSharpTotal.Add(extension, stbImageSharpResult.TimeInMs);
 				stbNativeTotal.Add(extension, stbNativeResult.TimeInMs);
+
+				GC.Collect();
 			}
 			catch (Exception ex)
 			{
