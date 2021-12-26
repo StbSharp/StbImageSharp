@@ -1567,13 +1567,6 @@ STBIDEF void   stbi_hdr_to_ldr_scale(float scale) { stbi__h2l_scale_i = 1/scale;
 // Common code used by all image loaders
 //
 
-enum testEnum
-{
-	A,
-	B = 10,
-	C
-};
-
 enum
 {
    STBI__SCAN_load=0,
