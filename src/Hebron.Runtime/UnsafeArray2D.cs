@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System;
+using System.Runtime.InteropServices;
 
 namespace Hebron.Runtime
 {
@@ -10,7 +11,7 @@ namespace Hebron.Runtime
 	unsafe class UnsafeArray2D<T> where T : struct
 	{
 		private readonly UnsafeArray1D<T>[] _data;
-		private long[] _pinAddresses;
+		private IntPtr[] _pinAddresses;
 		private readonly GCHandle _pinAddressesHandle;
 
 		public UnsafeArray1D<T> this[int index]
@@ -25,11 +26,11 @@ namespace Hebron.Runtime
 		public UnsafeArray2D(int size1, int size2)
 		{
 			_data = new UnsafeArray1D<T>[size1];
-			_pinAddresses = new long[size1];
+			_pinAddresses = new IntPtr[size1];
 			for (var i = 0; i < size1; ++i)
 			{
 				_data[i] = new UnsafeArray1D<T>(size2);
-				_pinAddresses[i] = _data[i].PinHandle.AddrOfPinnedObject().ToInt64();
+				_pinAddresses[i] = _data[i].PinHandle.AddrOfPinnedObject();
 			}
 
 			_pinAddressesHandle = GCHandle.Alloc(_pinAddresses, GCHandleType.Pinned);
