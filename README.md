@@ -7,7 +7,7 @@ StbImageSharp is C# port of the stb_image.h, which is C library to load images i
 
 It is important to note, that this project is **port**(not **wrapper**). Original C code had been ported to C#. Therefore StbImageSharp doesnt require any native binaries.
 
-The porting hasn't been done by hand, but using [Sichem](https://github.com/rds1983/Sichem), which is the C to C# code converter utility.
+The porting hasn't been done by hand, but using [Hebron](https://github.com/rds1983/Hebron), which is the C to C# code converter utility.
 
 # Adding Reference
 There are two ways of referencing StbImageSharp in the project:
@@ -122,6 +122,20 @@ And performance comparison results are(times are total loading times):
 
 # License
 Public Domain
+
+## Support
+[Discord](https://discord.gg/ZeHxhCY)
+
+## Building From Source Code
+1. Clone this repo.
+2. Open StbImageSharp.sln.
+
+## Sponsor
+https://www.patreon.com/rds1983
+
+https://boosty.to/rds1983
+
+bitcoin: 3GeKFcv8X1cn8WqH1mr8i7jgPBkQjQuyN1
 
 # Credits
 * [stb](https://github.com/nothings/stb)
