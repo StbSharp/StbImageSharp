@@ -270,7 +270,7 @@ namespace StbImageSharp.Testing
 				Log("StbImageSharp/Stb.Native matches/processed - {0}/{1}", filesMatches, filesProcessed);
 				Log("Tasks left - {0}", tasksStarted);
 				Log("GC Memory - {0}", GC.GetTotalMemory(true));
-				Log("Native Memory Allocations - {0}", MemoryStats.Allocations);
+				Log("Native Memory Allocations - {0}", StbImage.NativeAllocations);
 			}
 		}
 

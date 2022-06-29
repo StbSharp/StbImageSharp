@@ -3,12 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace Hebron.Runtime
 {
-#if !STBSHARP_INTERNAL
-	public
-#else
-	internal
-#endif
-	unsafe class UnsafeArray1D<T> where T : struct
+	internal unsafe class UnsafeArray1D<T> where T : struct
 	{
 		private readonly T[] _data;
 		private readonly GCHandle _pinHandle;
@@ -24,7 +19,7 @@ namespace Hebron.Runtime
 			}
 		}
 
-		public UnsafeArray1D(int size)
+		internal UnsafeArray1D(int size)
 		{
 			if (size < 0)
 			{
@@ -35,7 +30,7 @@ namespace Hebron.Runtime
 			_pinHandle = GCHandle.Alloc(_data, GCHandleType.Pinned);
 		}
 
-		public UnsafeArray1D(T[] data, int sizeOf)
+		internal UnsafeArray1D(T[] data, int sizeOf)
 		{
 			if (sizeOf <= 0)
 			{
@@ -57,11 +52,6 @@ namespace Hebron.Runtime
 		}
 
 		public static implicit operator void*(UnsafeArray1D<T> array)
-		{
-			return array.ToPointer();
-		}
-
-		public static void* operator +(UnsafeArray1D<T> array, int delta)
 		{
 			return array.ToPointer();
 		}

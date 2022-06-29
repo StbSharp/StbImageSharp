@@ -3,18 +3,13 @@ using System.Runtime.InteropServices;
 
 namespace Hebron.Runtime
 {
-#if !STBSHARP_INTERNAL
-	public
-#else
-	internal
-#endif
-	unsafe class UnsafeArray2D<T> where T : struct
+	internal unsafe class UnsafeArray2D<T> where T : struct
 	{
 		private readonly UnsafeArray1D<T>[] _data;
 		private IntPtr[] _pinAddresses;
 		private readonly GCHandle _pinAddressesHandle;
 
-		public UnsafeArray1D<T> this[int index]
+		internal UnsafeArray1D<T> this[int index]
 		{
 			get => _data[index];
 			set
@@ -23,7 +18,7 @@ namespace Hebron.Runtime
 			}
 		}
 
-		public UnsafeArray2D(int size1, int size2)
+		internal UnsafeArray2D(int size1, int size2)
 		{
 			_data = new UnsafeArray1D<T>[size1];
 			_pinAddresses = new IntPtr[size1];

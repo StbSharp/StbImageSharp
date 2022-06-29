@@ -505,7 +505,7 @@ namespace StbImageSharp
 			public byte* background;
 			public int bgindex;
 			public stbi__gif_lzw* codes;
-			public UnsafeArray1D<stbi__gif_lzw> codesArray = new UnsafeArray1D<stbi__gif_lzw>(8192);
+			internal UnsafeArray1D<stbi__gif_lzw> codesArray = new UnsafeArray1D<stbi__gif_lzw>(8192);
 			public byte* color_table;
 			public int cur_x;
 			public int cur_y;
@@ -517,11 +517,11 @@ namespace StbImageSharp
 			public int lflags;
 			public int line_size;
 			public byte** lpal;
-			public UnsafeArray2D<byte> lpalArray = new UnsafeArray2D<byte>(256, 4);
+			internal UnsafeArray2D<byte> lpalArray = new UnsafeArray2D<byte>(256, 4);
 			public int max_x;
 			public int max_y;
 			public byte** pal;
-			public UnsafeArray2D<byte> palArray = new UnsafeArray2D<byte>(256, 4);
+			internal UnsafeArray2D<byte> palArray = new UnsafeArray2D<byte>(256, 4);
 			public int parse;
 			public int ratio;
 			public int start_x;

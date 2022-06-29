@@ -111,7 +111,7 @@ namespace StbImageSharp.Tests
 				stream.Seek(0, SeekOrigin.Begin);
 			}
 
-			Assert.AreEqual(MemoryStats.Allocations, 0);
+			Assert.AreEqual(StbImage.NativeAllocations, 0);
 		}
 	}
 }

@@ -2,12 +2,7 @@
 
 namespace Hebron.Runtime
 {
-#if !STBSHARP_INTERNAL
-	public
-#else
-	internal
-#endif
-	unsafe static class MemoryStats
+	internal unsafe static class MemoryStats
 	{
 		private static int _allocations;
 		 

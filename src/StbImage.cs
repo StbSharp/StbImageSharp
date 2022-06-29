@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Hebron.Runtime;
+using System;
 using System.IO;
 using System.Runtime.InteropServices;
 
@@ -13,6 +14,8 @@ namespace StbImageSharp
 	{
 		public static string stbi__g_failure_reason;
 		public static readonly char[] stbi__parse_png_file_invalid_chunk = new char[25];
+
+		public static int NativeAllocations => MemoryStats.Allocations;
 
 		public class stbi__context
 		{

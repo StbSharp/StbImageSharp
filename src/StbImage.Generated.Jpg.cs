@@ -1596,18 +1596,18 @@ namespace StbImageSharp
 			public int code_bits;
 			public uint code_buffer;
 			public ushort** dequant;
-			public UnsafeArray2D<ushort> dequantArray = new UnsafeArray2D<ushort>(4, 64);
+			internal UnsafeArray2D<ushort> dequantArray = new UnsafeArray2D<ushort>(4, 64);
 			public int eob_run;
 			public short** fast_ac;
-			public UnsafeArray2D<short> fast_acArray = new UnsafeArray2D<short>(4, 512);
+			internal UnsafeArray2D<short> fast_acArray = new UnsafeArray2D<short>(4, 512);
 			public stbi__huffman* huff_ac;
-			public UnsafeArray1D<stbi__huffman> huff_acArray = new UnsafeArray1D<stbi__huffman>(4);
+			internal UnsafeArray1D<stbi__huffman> huff_acArray = new UnsafeArray1D<stbi__huffman>(4);
 			public stbi__huffman* huff_dc;
-			public UnsafeArray1D<stbi__huffman> huff_dcArray = new UnsafeArray1D<stbi__huffman>(4);
+			internal UnsafeArray1D<stbi__huffman> huff_dcArray = new UnsafeArray1D<stbi__huffman>(4);
 			public delegate0 idct_block_kernel;
 			public unnamed1* img_comp;
 
-			public UnsafeArray1D<unnamed1> img_compArray = new UnsafeArray1D<unnamed1>(4);
+			internal UnsafeArray1D<unnamed1> img_compArray = new UnsafeArray1D<unnamed1>(4);
 			public int img_h_max;
 			public int img_mcu_h;
 			public int img_mcu_w;
@@ -1618,7 +1618,7 @@ namespace StbImageSharp
 			public byte marker;
 			public int nomore;
 			public int* order;
-			public UnsafeArray1D<int> orderArray = new UnsafeArray1D<int>(4);
+			internal UnsafeArray1D<int> orderArray = new UnsafeArray1D<int>(4);
 			public int progressive;
 			public delegate2 resample_row_hv_2_kernel;
 			public int restart_interval;

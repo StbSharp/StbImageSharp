@@ -3,12 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace Hebron.Runtime
 {
-#if !STBSHARP_INTERNAL
-	public
-#else
-	internal
-#endif
-	static unsafe class CRuntime
+	internal static unsafe class CRuntime
 	{
 		private static readonly string numbers = "0123456789";
 
