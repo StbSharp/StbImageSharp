@@ -1,12 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <ApplicationIcon />
-    <StartupObject />
-    <AssemblyName>StbImageSharp.Testing</AssemblyName>
-    <RootNamespace>StbImageSharp.Testing</RootNamespace>
-    <TargetFramework>net462</TargetFramework>
-    <Platforms>x64</Platforms>
+    <TargetFramework>net6.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
 	<PackageReference Include="SixLabors.ImageSharp" Version="1.0.4" />
