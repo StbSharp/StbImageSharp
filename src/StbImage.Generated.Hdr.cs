@@ -6,124 +6,17 @@ namespace StbImageSharp
 {
 	unsafe partial class StbImage
 	{
-		public static void stbi__hdr_convert(float* output, byte* input, int req_comp)
+		public static int stbi__hdr_test(stbi__context s)
 		{
-			if (input[3] != 0)
+			var r = stbi__hdr_test_core(s, "#?RADIANCE\n");
+			stbi__rewind(s);
+			if (r == 0)
 			{
-				float f1 = 0;
-				f1 = (float)CRuntime.ldexp(1.0f, input[3] - (128 + 8));
-				if (req_comp <= 2)
-				{
-					output[0] = (input[0] + input[1] + input[2]) * f1 / 3;
-				}
-				else
-				{
-					output[0] = input[0] * f1;
-					output[1] = input[1] * f1;
-					output[2] = input[2] * f1;
-				}
-
-				if (req_comp == 2)
-					output[1] = 1;
-				if (req_comp == 4)
-					output[3] = 1;
-			}
-			else
-			{
-				switch (req_comp)
-				{
-					case 4:
-					case 3:
-						if (req_comp == 4) output[3] = 1;
-						output[0] = output[1] = output[2] = 0;
-						break;
-					case 2:
-					case 1:
-						if (req_comp == 2) output[1] = 1;
-						output[0] = 0;
-						break;
-				}
-			}
-		}
-
-		public static sbyte* stbi__hdr_gettoken(stbi__context z, sbyte* buffer)
-		{
-			var len = 0;
-			sbyte c = 0;
-			c = (sbyte)stbi__get8(z);
-			while (stbi__at_eof(z) == 0 && c != 10)
-			{
-				buffer[len++] = c;
-				if (len == 1024 - 1)
-				{
-					while (stbi__at_eof(z) == 0 && stbi__get8(z) != 10)
-					{
-					}
-
-					break;
-				}
-
-				c = (sbyte)stbi__get8(z);
-			}
-
-			buffer[len] = 0;
-			return buffer;
-		}
-
-		public static int stbi__hdr_info(stbi__context s, int* x, int* y, int* comp)
-		{
-			var buffer = stackalloc sbyte[1024];
-			sbyte* token;
-			var valid = 0;
-			var dummy = 0;
-			if (x == null)
-				x = &dummy;
-			if (y == null)
-				y = &dummy;
-			if (comp == null)
-				comp = &dummy;
-			if (stbi__hdr_test(s) == 0)
-			{
+				r = stbi__hdr_test_core(s, "#?RGBE\n");
 				stbi__rewind(s);
-				return 0;
 			}
 
-			for (; ; )
-			{
-				token = stbi__hdr_gettoken(s, buffer);
-				if (token[0] == 0)
-					break;
-				if (CRuntime.strcmp(token, "FORMAT=32-bit_rle_rgbe") == 0)
-					valid = 1;
-			}
-
-			if (valid == 0)
-			{
-				stbi__rewind(s);
-				return 0;
-			}
-
-			token = stbi__hdr_gettoken(s, buffer);
-			if (CRuntime.strncmp(token, "-Y ", 3) != 0)
-			{
-				stbi__rewind(s);
-				return 0;
-			}
-
-			token += 3;
-			*y = (int)CRuntime.strtol(token, &token, 10);
-			while (*token == 32) ++token;
-
-			if (CRuntime.strncmp(token, "+X ", 3) != 0)
-			{
-				stbi__rewind(s);
-				return 0;
-			}
-
-			token += 3;
-			*x = (int)CRuntime.strtol(token, null, 10);
-			*comp = 3;
-			return 1;
+			return r;
 		}
 
 		public static float* stbi__hdr_load(stbi__context s, int* x, int* y, int* comp, int req_comp,
@@ -165,8 +58,8 @@ namespace StbImageSharp
 				return (float*)(ulong)(stbi__err("unsupported data layout") != 0 ? 0 : 0);
 			token += 3;
 			height = (int)CRuntime.strtol(token, &token, 10);
-			while (*token == 32) ++token;
-
+			while (*token == 32)
+				++token;
 			if (CRuntime.strncmp(token, "+X ", 3) != 0)
 				return (float*)(ulong)(stbi__err("unsupported data layout") != 0 ? 0 : 0);
 			token += 3;
@@ -186,7 +79,6 @@ namespace StbImageSharp
 			hdr_data = (float*)stbi__malloc_mad4(width, height, req_comp, sizeof(float), 0);
 			if (hdr_data == null)
 				return (float*)(ulong)(stbi__err("outofmem") != 0 ? 0 : 0);
-
 			main_decode_loop:
 			var enterMainDecode = false;
 			if (enterMainDecode)
@@ -205,7 +97,6 @@ namespace StbImageSharp
 			if (width < 8 || width >= 32768)
 			{
 				i = j = 0;
-
 				enterMainDecode = true;
 				goto main_decode_loop;
 			}
@@ -267,7 +158,8 @@ namespace StbImageSharp
 								return (float*)(ulong)(stbi__err("corrupt") != 0 ? 0 : 0);
 							}
 
-							for (z = 0; z < count; ++z) scanline[i++ * 4 + k] = value;
+							for (z = 0; z < count; ++z)
+								scanline[i++ * 4 + k] = value;
 						}
 						else
 						{
@@ -278,7 +170,8 @@ namespace StbImageSharp
 								return (float*)(ulong)(stbi__err("corrupt") != 0 ? 0 : 0);
 							}
 
-							for (z = 0; z < count; ++z) scanline[i++ * 4 + k] = stbi__get8(s);
+							for (z = 0; z < count; ++z)
+								scanline[i++ * 4 + k] = stbi__get8(s);
 						}
 					}
 				}
@@ -289,32 +182,63 @@ namespace StbImageSharp
 
 			if (scanline != null)
 				CRuntime.free(scanline);
-
 			finish:
 			return hdr_data;
 		}
 
-		public static int stbi__hdr_test(stbi__context s)
+		public static int stbi__hdr_info(stbi__context s, int* x, int* y, int* comp)
 		{
-			var r = stbi__hdr_test_core(s, "#?RADIANCE\n");
-			stbi__rewind(s);
-			if (r == 0)
+			var buffer = stackalloc sbyte[1024];
+			sbyte* token;
+			var valid = 0;
+			var dummy = 0;
+			if (x == null)
+				x = &dummy;
+			if (y == null)
+				y = &dummy;
+			if (comp == null)
+				comp = &dummy;
+			if (stbi__hdr_test(s) == 0)
 			{
-				r = stbi__hdr_test_core(s, "#?RGBE\n");
 				stbi__rewind(s);
+				return 0;
 			}
 
-			return r;
-		}
+			for (; ; )
+			{
+				token = stbi__hdr_gettoken(s, buffer);
+				if (token[0] == 0)
+					break;
+				if (CRuntime.strcmp(token, "FORMAT=32-bit_rle_rgbe") == 0)
+					valid = 1;
+			}
 
-		public static int stbi__hdr_test_core(stbi__context s, string signature)
-		{
-			var i = 0;
-			for (i = 0; i < signature.Length; ++i)
-				if (stbi__get8(s) != signature[i])
-					return 0;
+			if (valid == 0)
+			{
+				stbi__rewind(s);
+				return 0;
+			}
 
-			stbi__rewind(s);
+			token = stbi__hdr_gettoken(s, buffer);
+			if (CRuntime.strncmp(token, "-Y ", 3) != 0)
+			{
+				stbi__rewind(s);
+				return 0;
+			}
+
+			token += 3;
+			*y = (int)CRuntime.strtol(token, &token, 10);
+			while (*token == 32)
+				++token;
+			if (CRuntime.strncmp(token, "+X ", 3) != 0)
+			{
+				stbi__rewind(s);
+				return 0;
+			}
+
+			token += 3;
+			*x = (int)CRuntime.strtol(token, null, 10);
+			*comp = 3;
 			return 1;
 		}
 
@@ -363,6 +287,82 @@ namespace StbImageSharp
 
 			CRuntime.free(data);
 			return output;
+		}
+
+		public static int stbi__hdr_test_core(stbi__context s, string signature)
+		{
+			var i = 0;
+			for (i = 0; i < signature.Length; ++i)
+				if (stbi__get8(s) != signature[i])
+					return 0;
+			stbi__rewind(s);
+			return 1;
+		}
+
+		public static sbyte* stbi__hdr_gettoken(stbi__context z, sbyte* buffer)
+		{
+			var len = 0;
+			sbyte c = 0;
+			c = (sbyte)stbi__get8(z);
+			while (stbi__at_eof(z) == 0 && c != 10)
+			{
+				buffer[len++] = c;
+				if (len == 1024 - 1)
+				{
+					while (stbi__at_eof(z) == 0 && stbi__get8(z) != 10)
+					{
+					}
+
+					break;
+				}
+
+				c = (sbyte)stbi__get8(z);
+			}
+
+			buffer[len] = 0;
+			return buffer;
+		}
+
+		public static void stbi__hdr_convert(float* output, byte* input, int req_comp)
+		{
+			if (input[3] != 0)
+			{
+				float f1 = 0;
+				f1 = (float)CRuntime.ldexp(1.0f, input[3] - (128 + 8));
+				if (req_comp <= 2)
+				{
+					output[0] = (input[0] + input[1] + input[2]) * f1 / 3;
+				}
+				else
+				{
+					output[0] = input[0] * f1;
+					output[1] = input[1] * f1;
+					output[2] = input[2] * f1;
+				}
+
+				if (req_comp == 2)
+					output[1] = 1;
+				if (req_comp == 4)
+					output[3] = 1;
+			}
+			else
+			{
+				switch (req_comp)
+				{
+					case 4:
+					case 3:
+						if (req_comp == 4)
+							output[3] = 1;
+						output[0] = output[1] = output[2] = 0;
+						break;
+					case 2:
+					case 1:
+						if (req_comp == 2)
+							output[1] = 1;
+						output[0] = 0;
+						break;
+				}
+			}
 		}
 	}
 }

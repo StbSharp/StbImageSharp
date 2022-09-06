@@ -76,7 +76,7 @@ namespace StbSharp.StbImage.Generator
 
 		private static void Write<T>(Dictionary<string, T> input, Dictionary<string, string> output) where T : SyntaxNode
 		{
-			var keys = (from string k in input.Keys orderby k select k).ToArray();
+			var keys = (from string k in input.Keys select k).ToArray();
 			foreach (var key in keys)
 			{
 				string outputKey = null;

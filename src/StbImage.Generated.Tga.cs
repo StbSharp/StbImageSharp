@@ -6,124 +6,46 @@ namespace StbImageSharp
 {
 	unsafe partial class StbImage
 	{
-		public static int stbi__tga_get_comp(int bits_per_pixel, int is_grey, int* is_rgb16)
+		public static int stbi__tga_test(stbi__context s)
 		{
-			if (is_rgb16 != null)
-				*is_rgb16 = 0;
-			switch (bits_per_pixel)
-			{
-				case 8:
-					return STBI_grey;
-				case 16:
-				case 15:
-					if (bits_per_pixel == 16 && is_grey != 0)
-						return STBI_grey_alpha;
-					if (is_rgb16 != null)
-						*is_rgb16 = 1;
-					return STBI_rgb;
-				case 24:
-				case 32:
-					return bits_per_pixel / 8;
-				default:
-					return 0;
-			}
-		}
-
-		public static int stbi__tga_info(stbi__context s, int* x, int* y, int* comp)
-		{
-			var tga_w = 0;
-			var tga_h = 0;
-			var tga_comp = 0;
-			var tga_image_type = 0;
-			var tga_bits_per_pixel = 0;
-			var tga_colormap_bpp = 0;
+			var res = 0;
 			var sz = 0;
-			var tga_colormap_type = 0;
+			var tga_color_type = 0;
 			stbi__get8(s);
-			tga_colormap_type = stbi__get8(s);
-			if (tga_colormap_type > 1)
+			tga_color_type = stbi__get8(s);
+			if (tga_color_type > 1)
+				goto errorEnd;
+			sz = stbi__get8(s);
+			if (tga_color_type == 1)
 			{
-				stbi__rewind(s);
-				return 0;
-			}
-
-			tga_image_type = stbi__get8(s);
-			if (tga_colormap_type == 1)
-			{
-				if (tga_image_type != 1 && tga_image_type != 9)
-				{
-					stbi__rewind(s);
-					return 0;
-				}
-
+				if (sz != 1 && sz != 9)
+					goto errorEnd;
 				stbi__skip(s, 4);
 				sz = stbi__get8(s);
 				if (sz != 8 && sz != 15 && sz != 16 && sz != 24 && sz != 32)
-				{
-					stbi__rewind(s);
-					return 0;
-				}
-
+					goto errorEnd;
 				stbi__skip(s, 4);
-				tga_colormap_bpp = sz;
 			}
 			else
 			{
-				if (tga_image_type != 2 && tga_image_type != 3 && tga_image_type != 10 && tga_image_type != 11)
-				{
-					stbi__rewind(s);
-					return 0;
-				}
-
+				if (sz != 2 && sz != 3 && sz != 10 && sz != 11)
+					goto errorEnd;
 				stbi__skip(s, 9);
-				tga_colormap_bpp = 0;
 			}
 
-			tga_w = stbi__get16le(s);
-			if (tga_w < 1)
-			{
-				stbi__rewind(s);
-				return 0;
-			}
-
-			tga_h = stbi__get16le(s);
-			if (tga_h < 1)
-			{
-				stbi__rewind(s);
-				return 0;
-			}
-
-			tga_bits_per_pixel = stbi__get8(s);
-			stbi__get8(s);
-			if (tga_colormap_bpp != 0)
-			{
-				if (tga_bits_per_pixel != 8 && tga_bits_per_pixel != 16)
-				{
-					stbi__rewind(s);
-					return 0;
-				}
-
-				tga_comp = stbi__tga_get_comp(tga_colormap_bpp, 0, null);
-			}
-			else
-			{
-				tga_comp = stbi__tga_get_comp(tga_bits_per_pixel, tga_image_type == 3 || tga_image_type == 11 ? 1 : 0,
-					null);
-			}
-
-			if (tga_comp == 0)
-			{
-				stbi__rewind(s);
-				return 0;
-			}
-
-			if (x != null)
-				*x = tga_w;
-			if (y != null)
-				*y = tga_h;
-			if (comp != null)
-				*comp = tga_comp;
-			return 1;
+			if (stbi__get16le(s) < 1)
+				goto errorEnd;
+			if (stbi__get16le(s) < 1)
+				goto errorEnd;
+			sz = stbi__get8(s);
+			if (tga_color_type == 1 && sz != 8 && sz != 16)
+				goto errorEnd;
+			if (sz != 8 && sz != 15 && sz != 16 && sz != 24 && sz != 32)
+				goto errorEnd;
+			res = 1;
+		errorEnd:;
+			stbi__rewind(s);
+			return res;
 		}
 
 		public static void* stbi__tga_load(stbi__context s, int* x, int* y, int* comp, int req_comp,
@@ -249,10 +171,11 @@ namespace StbImageSharp
 						if (tga_indexed != 0)
 						{
 							var pal_idx = tga_bits_per_pixel == 8 ? stbi__get8(s) : stbi__get16le(s);
-							if (pal_idx >= tga_palette_len) pal_idx = 0;
-
+							if (pal_idx >= tga_palette_len)
+								pal_idx = 0;
 							pal_idx *= tga_comp;
-							for (j = 0; j < tga_comp; ++j) raw_data[j] = tga_palette[pal_idx + j];
+							for (j = 0; j < tga_comp; ++j)
+								raw_data[j] = tga_palette[pal_idx + j];
 						}
 						else if (tga_rgb16 != 0)
 						{
@@ -260,14 +183,15 @@ namespace StbImageSharp
 						}
 						else
 						{
-							for (j = 0; j < tga_comp; ++j) raw_data[j] = stbi__get8(s);
+							for (j = 0; j < tga_comp; ++j)
+								raw_data[j] = stbi__get8(s);
 						}
 
 						read_next_pixel = 0;
 					}
 
-					for (j = 0; j < tga_comp; ++j) tga_data[i * tga_comp + j] = raw_data[j];
-
+					for (j = 0; j < tga_comp; ++j)
+						tga_data[i * tga_comp + j] = raw_data[j];
 					--RLE_count;
 				}
 
@@ -286,7 +210,8 @@ namespace StbImageSharp
 						}
 					}
 
-				if (tga_palette != null) CRuntime.free(tga_palette);
+				if (tga_palette != null)
+					CRuntime.free(tga_palette);
 			}
 
 			if (tga_comp >= 3 && tga_rgb16 == 0)
@@ -307,6 +232,126 @@ namespace StbImageSharp
 			return tga_data;
 		}
 
+		public static int stbi__tga_info(stbi__context s, int* x, int* y, int* comp)
+		{
+			var tga_w = 0;
+			var tga_h = 0;
+			var tga_comp = 0;
+			var tga_image_type = 0;
+			var tga_bits_per_pixel = 0;
+			var tga_colormap_bpp = 0;
+			var sz = 0;
+			var tga_colormap_type = 0;
+			stbi__get8(s);
+			tga_colormap_type = stbi__get8(s);
+			if (tga_colormap_type > 1)
+			{
+				stbi__rewind(s);
+				return 0;
+			}
+
+			tga_image_type = stbi__get8(s);
+			if (tga_colormap_type == 1)
+			{
+				if (tga_image_type != 1 && tga_image_type != 9)
+				{
+					stbi__rewind(s);
+					return 0;
+				}
+
+				stbi__skip(s, 4);
+				sz = stbi__get8(s);
+				if (sz != 8 && sz != 15 && sz != 16 && sz != 24 && sz != 32)
+				{
+					stbi__rewind(s);
+					return 0;
+				}
+
+				stbi__skip(s, 4);
+				tga_colormap_bpp = sz;
+			}
+			else
+			{
+				if (tga_image_type != 2 && tga_image_type != 3 && tga_image_type != 10 && tga_image_type != 11)
+				{
+					stbi__rewind(s);
+					return 0;
+				}
+
+				stbi__skip(s, 9);
+				tga_colormap_bpp = 0;
+			}
+
+			tga_w = stbi__get16le(s);
+			if (tga_w < 1)
+			{
+				stbi__rewind(s);
+				return 0;
+			}
+
+			tga_h = stbi__get16le(s);
+			if (tga_h < 1)
+			{
+				stbi__rewind(s);
+				return 0;
+			}
+
+			tga_bits_per_pixel = stbi__get8(s);
+			stbi__get8(s);
+			if (tga_colormap_bpp != 0)
+			{
+				if (tga_bits_per_pixel != 8 && tga_bits_per_pixel != 16)
+				{
+					stbi__rewind(s);
+					return 0;
+				}
+
+				tga_comp = stbi__tga_get_comp(tga_colormap_bpp, 0, null);
+			}
+			else
+			{
+				tga_comp = stbi__tga_get_comp(tga_bits_per_pixel, tga_image_type == 3 || tga_image_type == 11 ? 1 : 0,
+					null);
+			}
+
+			if (tga_comp == 0)
+			{
+				stbi__rewind(s);
+				return 0;
+			}
+
+			if (x != null)
+				*x = tga_w;
+			if (y != null)
+				*y = tga_h;
+			if (comp != null)
+				*comp = tga_comp;
+			return 1;
+		}
+
+		public static int stbi__tga_get_comp(int bits_per_pixel, int is_grey, int* is_rgb16)
+		{
+			if (is_rgb16 != null)
+				*is_rgb16 = 0;
+			switch (bits_per_pixel)
+			{
+				case 8:
+					return STBI_grey;
+				case 16:
+				case 15:
+					if (bits_per_pixel == 16 && is_grey != 0)
+						return STBI_grey_alpha;
+					if (is_rgb16 != null)
+						*is_rgb16 = 1;
+					return STBI_rgb;
+				case 24:
+				case 32:
+					return bits_per_pixel / 8;
+				default:
+					return 0;
+			}
+		}
+
 		public static void stbi__tga_read_rgb16(stbi__context s, byte* _out_)
 		{
 			var px = (ushort)stbi__get16le(s);
@@ -317,48 +362,6 @@ namespace StbImageSharp
 			_out_[0] = (byte)(r * 255 / 31);
 			_out_[1] = (byte)(g * 255 / 31);
 			_out_[2] = (byte)(b * 255 / 31);
-		}
-
-		public static int stbi__tga_test(stbi__context s)
-		{
-			var res = 0;
-			var sz = 0;
-			var tga_color_type = 0;
-			stbi__get8(s);
-			tga_color_type = stbi__get8(s);
-			if (tga_color_type > 1)
-				goto errorEnd;
-			sz = stbi__get8(s);
-			if (tga_color_type == 1)
-			{
-				if (sz != 1 && sz != 9)
-					goto errorEnd;
-				stbi__skip(s, 4);
-				sz = stbi__get8(s);
-				if (sz != 8 && sz != 15 && sz != 16 && sz != 24 && sz != 32)
-					goto errorEnd;
-				stbi__skip(s, 4);
-			}
-			else
-			{
-				if (sz != 2 && sz != 3 && sz != 10 && sz != 11)
-					goto errorEnd;
-				stbi__skip(s, 9);
-			}
-
-			if (stbi__get16le(s) < 1)
-				goto errorEnd;
-			if (stbi__get16le(s) < 1)
-				goto errorEnd;
-			sz = stbi__get8(s);
-			if (tga_color_type == 1 && sz != 8 && sz != 16)
-				goto errorEnd;
-			if (sz != 8 && sz != 15 && sz != 16 && sz != 24 && sz != 32)
-				goto errorEnd;
-			res = 1;
-		errorEnd:;
-			stbi__rewind(s);
-			return res;
 		}
 	}
 }
