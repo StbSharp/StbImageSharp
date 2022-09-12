@@ -23,8 +23,7 @@ namespace StbImageSharp
 			uint mb = 0;
 			uint ma = 0;
 			uint all_a = 0;
-			var palArray = new UnsafeArray2D<byte>(256, 4);
-			var pal = (byte**)palArray;
+			var pal = Utility.CreateArray<byte>(256, 4);
 			var psize = 0;
 			var i = 0;
 			var j = 0;

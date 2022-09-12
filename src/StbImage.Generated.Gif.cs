@@ -130,7 +130,7 @@ namespace StbImageSharp
 			return 1;
 		}
 
-		public static void stbi__gif_parse_colortable(stbi__context s, byte** pal, int num_entries, int transp)
+		public static void stbi__gif_parse_colortable(stbi__context s, byte[][] pal, int num_entries, int transp)
 		{
 			var i = 0;
 			for (i = 0; i < num_entries; ++i)
@@ -193,7 +193,6 @@ namespace StbImageSharp
 		public static void stbi__out_gif_code(stbi__gif g, ushort code)
 		{
 			byte* p;
-			byte* c;
 			var idx = 0;
 			if (g.codes[code].prefix >= 0)
 				stbi__out_gif_code(g, (ushort)g.codes[code].prefix);
@@ -202,7 +201,7 @@ namespace StbImageSharp
 			idx = g.cur_x + g.cur_y;
 			p = &g._out_[idx];
 			g.history[idx / 4] = 1;
-			c = &g.color_table[g.codes[code].suffix * 4];
+			var c = g.color_table[g.codes[code].suffix];
 			if (c[3] > 128)
 			{
 				p[0] = c[2];
@@ -298,12 +297,15 @@ namespace StbImageSharp
 							return (byte*)(ulong)(stbi__err("no clear code") != 0 ? 0 : 0);
 						if (oldcode >= 0)
 						{
-							p = &g.codes[avail++];
-							if (avail > 8192)
-								return (byte*)(ulong)(stbi__err("too many codes") != 0 ? 0 : 0);
-							p->prefix = (short)oldcode;
-							p->first = g.codes[oldcode].first;
-							p->suffix = code == avail ? p->first : g.codes[code].first;
+							fixed (stbi__gif_lzw *p2 = &g.codes[avail++])
+							{
+								p = p2;
+								if (avail > 8192)
+									return (byte*)(ulong)(stbi__err("too many codes") != 0 ? 0 : 0);
+								p->prefix = (short)oldcode;
+								p->first = g.codes[oldcode].first;
+								p->suffix = code == avail ? p->first : g.codes[code].first;
+							}
 						}
 						else if (code == avail)
 						{
@@ -416,11 +418,11 @@ namespace StbImageSharp
 							{
 								stbi__gif_parse_colortable(s, g.lpal, 2 << (g.lflags & 7),
 									(g.eflags & 0x01) != 0 ? g.transparent : -1);
-								g.color_table = (byte*)g.lpal;
+								g.color_table = g.lpal;
 							}
 							else if ((g.flags & 0x80) != 0)
 							{
-								g.color_table = (byte*)g.pal;
+								g.color_table = g.pal;
 							}
 							else
 							{
@@ -436,7 +438,10 @@ namespace StbImageSharp
 									if (g.history[pi] == 0)
 									{
 										g.pal[g.bgindex][3] = 255;
-										CRuntime.memcpy(&g._out_[pi * 4], &g.pal[g.bgindex], (ulong)4);
+										fixed (byte* ptr = &g.pal[g.bgindex][0])
+										{
+											CRuntime.memcpy(&g._out_[pi * 4], ptr, (ulong)4);
+										}
 									}
 
 							return o;
@@ -504,9 +509,8 @@ namespace StbImageSharp
 			public byte* _out_;
 			public byte* background;
 			public int bgindex;
-			public stbi__gif_lzw* codes;
-			internal UnsafeArray1D<stbi__gif_lzw> codesArray = new UnsafeArray1D<stbi__gif_lzw>(8192);
-			public byte* color_table;
+			public stbi__gif_lzw[] codes = new stbi__gif_lzw[8192];
+			public byte[][] color_table;
 			public int cur_x;
 			public int cur_y;
 			public int delay;
@@ -516,12 +520,10 @@ namespace StbImageSharp
 			public byte* history;
 			public int lflags;
 			public int line_size;
-			public byte** lpal;
-			internal UnsafeArray2D<byte> lpalArray = new UnsafeArray2D<byte>(256, 4);
+			public byte[][] lpal = Utility.CreateArray<byte>(256, 4);
 			public int max_x;
 			public int max_y;
-			public byte** pal;
-			internal UnsafeArray2D<byte> palArray = new UnsafeArray2D<byte>(256, 4);
+			public byte[][] pal = Utility.CreateArray<byte>(256, 4);
 			public int parse;
 			public int ratio;
 			public int start_x;
@@ -529,13 +531,6 @@ namespace StbImageSharp
 			public int step;
 			public int transparent;
 			public int w;
-
-			public stbi__gif()
-			{
-				pal = (byte**)palArray;
-				lpal = (byte**)lpalArray;
-				codes = (stbi__gif_lzw*)codesArray;
-			}
 		}
 
 		[StructLayout(LayoutKind.Sequential)]
