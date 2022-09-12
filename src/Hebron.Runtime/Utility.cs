@@ -1,4 +1,4 @@
-﻿namespace StbImageSharp
+﻿namespace Hebron.Runtime
 {
 	internal class Utility
 	{
