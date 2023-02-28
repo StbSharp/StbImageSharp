@@ -222,22 +222,22 @@ namespace StbImageSharp.Testing
 
 				match = true;
 
-				if (extension != "tga" && extension != "psd" && extension != "pic" && extension != "hdr")
+				if (extension != "psd" && extension != "pic" && extension != "hdr")
 				{
 					var imageSharpResult = ParseTest(
 						"ImageSharp",
 						(out int x, out int y, out ColorComponents ccomp) =>
 						{
-							using (Image<Rgba32> image = Image.Load(data))
+							using (var image = Image.Load<Rgba32>(data))
 							{
 								x = image.Width;
 								y = image.Height;
 								ccomp = ColorComponents.Default;
 
-								Span<Rgba32> span;
-								image.TryGetSinglePixelSpan(out span);
+								var memoryGroup = image.GetPixelMemoryGroup().ToArray()[0];
+								var pixelData = MemoryMarshal.AsBytes(memoryGroup.Span).ToArray();
 
-								return MemoryMarshal.AsBytes(span).ToArray();
+								return pixelData;
 							}
 						}
 					);
