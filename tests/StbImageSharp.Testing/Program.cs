@@ -108,23 +108,28 @@ namespace StbImageSharp.Testing
 			Log("With " + name);
 			int x = 0, y = 0;
 			var comp = ColorComponents.Grey;
-			var parsed = new byte[0];
+			KeepAliveResult parsed = default;
 			BeginWatch(sw);
 
 			for (var i = 0; i < LoadTries; ++i)
+			{
+				parsed.KeepAlive?.Dispose();
 				parsed = load(out x, out y, out comp);
-
-			Log("x: {0}, y: {1}, comp: {2}, size: {3}", x, y, comp, parsed.Length);
+			}
+			
+			Log("x: {0}, y: {1}, comp: {2}, size: {3}", x, y, comp, parsed.Data.Length);
 			var passed = EndWatch(sw) / LoadTries;
 			Log("Span: {0} ms", passed);
 
+			var parsedByteArray = parsed.Data.ToArray();
+			parsed.KeepAlive?.Dispose();
 			return new LoadResult
 			{
 				Width = x,
 				Height = y,
 				Components = comp,
-				Data = parsed,
-				TimeInMs = passed
+				Data = parsedByteArray,
+				TimeInMs = passed,
 			};
 		}
 
@@ -185,7 +190,10 @@ namespace StbImageSharp.Testing
 						y = img.Height;
 						ccomp = img.SourceComp;
 
-						return img.Data;
+						return new KeepAliveResult() {
+							Data = img.Data,
+							KeepAlive = img
+						};
 					});
 
 				var stbNativeResult = ParseTest(
@@ -195,7 +203,7 @@ namespace StbImageSharp.Testing
 						var result = Native.load_from_memory(data, out x, out y, out var icomp,
 							(int)ColorComponents.RedGreenBlueAlpha);
 						ccomp = (ColorComponents)icomp;
-						return result;
+						return new KeepAliveResult() { Data = result };
 					});
 
 
@@ -228,17 +236,17 @@ namespace StbImageSharp.Testing
 						"ImageSharp",
 						(out int x, out int y, out ColorComponents ccomp) =>
 						{
-							using (var image = Image.Load<Rgba32>(data))
-							{
-								x = image.Width;
-								y = image.Height;
-								ccomp = ColorComponents.Default;
+							var image = Image.Load<Rgba32>(data);
+							x = image.Width;
+							y = image.Height;
+							ccomp = ColorComponents.Default;
 
-								var memoryGroup = image.GetPixelMemoryGroup().ToArray()[0];
-								var pixelData = MemoryMarshal.AsBytes(memoryGroup.Span).ToArray();
+							var memoryGroup = image.GetPixelMemoryGroup().ToArray()[0];
 
-								return pixelData;
-							}
+							return new KeepAliveResult() {
+								Data = MemoryMarshal.AsBytes(memoryGroup.Span),
+								KeepAlive = image
+							};
 						}
 					);
 					imageSharpTotal.Add(extension, imageSharpResult.TimeInMs);
@@ -302,6 +310,11 @@ namespace StbImageSharp.Testing
 
 		private delegate void WriteDelegate(ImageResult image, Stream stream);
 
-		private delegate byte[] LoadDelegate(out int x, out int y, out ColorComponents comp);
+		private ref struct KeepAliveResult
+		{
+			public Span<byte> Data { get; set; }
+			public IDisposable KeepAlive { get; set; }
+		}
+		private delegate KeepAliveResult LoadDelegate(out int x, out int y, out ColorComponents comp);
 	}
 }

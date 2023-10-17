@@ -60,9 +60,9 @@ namespace StbImageSharp.Samples.MonoGame
 			{
 				if (!_isAnimatedGif)
 				{
-					var image = ImageResult.FromStream(stream, ColorComponents.RedGreenBlueAlpha);
+					using var image = ImageResult.FromStream(stream, ColorComponents.RedGreenBlueAlpha);
 					var texture = new Texture2D(GraphicsDevice, image.Width, image.Height, false, SurfaceFormat.Color);
-					texture.SetData(image.Data);
+					texture.SetData(image.Data.ToArray());
 
 					var frame = new FrameInfo
 					{
@@ -77,8 +77,8 @@ namespace StbImageSharp.Samples.MonoGame
 					_totalDelayInMs = 0;
 					foreach(var image in ImageResult.AnimatedGifFramesFromStream(stream))
 					{
-						var texture = new Texture2D(GraphicsDevice, image.Width, image.Height, false, SurfaceFormat.Color);
-						texture.SetData(image.Data);
+						using var texture = new Texture2D(GraphicsDevice, image.Width, image.Height, false, SurfaceFormat.Color);
+						texture.SetData(image.Data.ToArray());
 
 						var frame = new FrameInfo
 						{

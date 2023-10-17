@@ -17,49 +17,40 @@ namespace StbImageSharp.Tests
 		public void LoadUnknownFormat(string filename)
 		{
 			Assert.Throws<InvalidOperationException>(() =>
-			{
-				ImageResult result = null;
-				using (var stream = _assembly.OpenResourceStream(filename))
-				{
-					result = ImageResult.FromStream(stream, ColorComponents.RedGreenBlueAlpha);
-				}
+			{ 
+				using var stream = _assembly.OpenResourceStream(filename);
+				using var result = ImageResult.FromStream(stream, ColorComponents.RedGreenBlueAlpha);
 			});
 		}
 
 		[TestCase("sample_1280×853.hdr", 1280, 853, ColorComponents.RedGreenBlue)]
 		[TestCase("DockPanes.jpg", 609, 406, ColorComponents.RedGreenBlue)]
-		public void Load(string filename, int width, int height, ColorComponents colorComponents)
+		public unsafe void Load(string filename, int width, int height, ColorComponents colorComponents)
 		{
-			ImageResult result = null;
-			using (var stream = _assembly.OpenResourceStream(filename))
-			{
-				result = ImageResult.FromStream(stream, ColorComponents.RedGreenBlueAlpha);
-			}
+			using var stream = _assembly.OpenResourceStream(filename);
+			using var result = ImageResult.FromStream(stream, ColorComponents.RedGreenBlueAlpha);
 
 			Assert.IsNotNull(result);
 			Assert.AreEqual(result.Width, width);
 			Assert.AreEqual(result.Height, height);
 			Assert.AreEqual(result.Comp, ColorComponents.RedGreenBlueAlpha);
 			Assert.AreEqual(result.SourceComp, colorComponents);
-			Assert.IsNotNull(result.Data);
+			Assert.That(result.DataPtr is not null);
 			Assert.AreEqual(result.Data.Length, result.Width * result.Height * 4);
 		}
 
 		[TestCase("sample_1280×853.hdr", 1280, 853, ColorComponents.RedGreenBlue)]
-		public void LoadHdr(string filename, int width, int height, ColorComponents colorComponents)
+		public unsafe void LoadHdr(string filename, int width, int height, ColorComponents colorComponents)
 		{
-			ImageResultFloat result = null;
-			using(var stream = _assembly.OpenResourceStream(filename))
-			{
-				result = ImageResultFloat.FromStream(stream, ColorComponents.RedGreenBlueAlpha);
-			}
+			using var stream = _assembly.OpenResourceStream(filename);
+			using var result = ImageResultFloat.FromStream(stream, ColorComponents.RedGreenBlueAlpha);
 
 			Assert.IsNotNull(result);
 			Assert.AreEqual(result.Width, width);
 			Assert.AreEqual(result.Height, height);
 			Assert.AreEqual(result.Comp, ColorComponents.RedGreenBlueAlpha);
 			Assert.AreEqual(result.SourceComp, colorComponents);
-			Assert.IsNotNull(result.Data);
+			Assert.That(result.DataPtr is not null);
 			Assert.AreEqual(result.Data.Length, result.Width * result.Height * 4);
 		}
 
@@ -90,7 +81,7 @@ namespace StbImageSharp.Tests
 		}
 
 		[TestCase("somersault.gif", 384, 480, ColorComponents.RedGreenBlueAlpha, 43)]
-		public void AnimatedGifFrames(string fileName, int width, int height, ColorComponents colorComponents, int originalFrameCount)
+		public unsafe void AnimatedGifFrames(string fileName, int width, int height, ColorComponents colorComponents, int originalFrameCount)
 		{
 			using (var stream = _assembly.OpenResourceStream(fileName))
 			{
@@ -100,7 +91,7 @@ namespace StbImageSharp.Tests
 					Assert.AreEqual(frame.Width, width);
 					Assert.AreEqual(frame.Height, height);
 					Assert.AreEqual(frame.Comp, colorComponents);
-					Assert.IsNotNull(frame.Data);
+					Assert.That(frame.DataPtr is not null);
 					Assert.AreEqual(frame.Data.Length, frame.Width * frame.Height * (int)frame.Comp);
 
 					++frameCount;

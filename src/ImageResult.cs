@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.InteropServices;
 using Hebron.Runtime;
 
 namespace StbImageSharp
@@ -11,13 +10,16 @@ namespace StbImageSharp
 #else
 	internal
 #endif
-	class ImageResult
+	class ImageResult : IDisposable
 	{
 		public int Width { get; set; }
 		public int Height { get; set; }
 		public ColorComponents SourceComp { get; set; }
 		public ColorComponents Comp { get; set; }
-		public byte[] Data { get; set; }
+
+		public unsafe byte* DataPtr { get; set; }
+		public int DataLength { get; set; }
+		public unsafe Span<byte> Data => new Span<byte>(DataPtr, DataLength);
 
 		internal static unsafe ImageResult FromResult(byte* result, int width, int height, ColorComponents comp,
 			ColorComponents req_comp)
@@ -30,12 +32,10 @@ namespace StbImageSharp
 				Width = width,
 				Height = height,
 				SourceComp = comp,
-				Comp = req_comp == ColorComponents.Default ? comp : req_comp
+				Comp = req_comp == ColorComponents.Default ? comp : req_comp,
+				DataPtr = result,
 			};
-
-			// Convert to array
-			image.Data = new byte[width * height * (int)image.Comp];
-			Marshal.Copy(new IntPtr(result), image.Data, 0, image.Data.Length);
+			image.DataLength = width * height * (int)image.Comp;
 
 			return image;
 		}
@@ -43,23 +43,13 @@ namespace StbImageSharp
 		public static unsafe ImageResult FromStream(Stream stream,
 			ColorComponents requiredComponents = ColorComponents.Default)
 		{
-			byte* result = null;
+			int x, y, comp;
 
-			try
-			{
-				int x, y, comp;
+			var context = new StbImage.stbi__context(stream);
 
-				var context = new StbImage.stbi__context(stream);
+			var result = StbImage.stbi__load_and_postprocess_8bit(context, &x, &y, &comp, (int)requiredComponents);
 
-				result = StbImage.stbi__load_and_postprocess_8bit(context, &x, &y, &comp, (int)requiredComponents);
-
-				return FromResult(result, x, y, (ColorComponents)comp, requiredComponents);
-			}
-			finally
-			{
-				if (result != null)
-					CRuntime.free(result);
-			}
+			return FromResult(result, x, y, (ColorComponents)comp, requiredComponents);
 		}
 
 		public static ImageResult FromMemory(byte[] data, ColorComponents requiredComponents = ColorComponents.Default)
@@ -74,6 +64,22 @@ namespace StbImageSharp
 			ColorComponents requiredComponents = ColorComponents.Default)
 		{
 			return new AnimatedGifEnumerable(stream, requiredComponents);
+		}
+
+		private unsafe void Dispose(bool disposing)
+		{
+			CRuntime.free(DataPtr);
+		}
+
+		public void Dispose()
+		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+
+		~ImageResult()
+		{
+			Dispose(false);
 		}
 	}
 }

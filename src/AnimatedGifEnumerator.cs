@@ -3,7 +3,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.InteropServices;
 
 namespace StbImageSharp
 {
@@ -51,15 +50,13 @@ namespace StbImageSharp
 					Width = _gif.w,
 					Height = _gif.h,
 					SourceComp = (ColorComponents)ccomp,
-					Comp = ColorComponents == ColorComponents.Default ? (ColorComponents)ccomp : ColorComponents
+					Comp = ColorComponents == ColorComponents.Default ? (ColorComponents)ccomp : ColorComponents,
+					DataPtr = result,
 				};
-
-				Current.Data = new byte[Current.Width * Current.Height * (int)Current.Comp];
+				Current.DataLength = Current.Width * Current.Height * (int)Current.Comp;
 			}
 
 			Current.DelayInMs = _gif.delay;
-
-			Marshal.Copy(new IntPtr(result), Current.Data, 0, Current.Data.Length);
 
 			return true;
 		}
@@ -76,6 +73,15 @@ namespace StbImageSharp
 
 		protected unsafe virtual void Dispose(bool disposing)
 		{
+			if (Current != null)
+			{
+				// We do not want to free the data pointer here,
+				// because it is owned by the gif object
+				Current.DataPtr = null;
+				Current.Dispose();
+				Current = null;
+			}
+
 			if (_gif != null)
 			{
 				if (_gif._out_ != null)

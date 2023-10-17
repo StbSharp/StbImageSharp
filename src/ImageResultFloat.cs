@@ -10,13 +10,16 @@ namespace StbImageSharp
 #else
 	internal
 #endif
-	class ImageResultFloat
+	class ImageResultFloat : IDisposable
 	{
 		public int Width { get; set; }
 		public int Height { get; set; }
 		public ColorComponents SourceComp { get; set; }
 		public ColorComponents Comp { get; set; }
-		public float[] Data { get; set; }
+		
+		public unsafe float* DataPtr { get; set; }
+		public int DataLength { get; set; }
+		public unsafe Span<float> Data => new Span<float>(DataPtr, DataLength);
 
 		internal static unsafe ImageResultFloat FromResult(float* result, int width, int height, ColorComponents comp,
 			ColorComponents req_comp)
@@ -29,12 +32,10 @@ namespace StbImageSharp
 				Width = width,
 				Height = height,
 				SourceComp = comp,
-				Comp = req_comp == ColorComponents.Default ? comp : req_comp
+				Comp = req_comp == ColorComponents.Default ? comp : req_comp,
+				DataPtr = result,
 			};
-
-			// Convert to array
-			image.Data = new float[width * height * (int)image.Comp];
-			Marshal.Copy(new IntPtr(result), image.Data, 0, image.Data.Length);
+			image.DataLength = width * height * (int)image.Comp;
 
 			return image;
 		}
@@ -42,23 +43,13 @@ namespace StbImageSharp
 		public static unsafe ImageResultFloat FromStream(Stream stream,
 			ColorComponents requiredComponents = ColorComponents.Default)
 		{
-			float* result = null;
+			int x, y, comp;
 
-			try
-			{
-				int x, y, comp;
+			var context = new StbImage.stbi__context(stream);
 
-				var context = new StbImage.stbi__context(stream);
+			var result = StbImage.stbi__loadf_main(context, &x, &y, &comp, (int)requiredComponents);
 
-				result = StbImage.stbi__loadf_main(context, &x, &y, &comp, (int)requiredComponents);
-
-				return FromResult(result, x, y, (ColorComponents)comp, requiredComponents);
-			}
-			finally
-			{
-				if (result != null)
-					CRuntime.free(result);
-			}
+			return FromResult(result, x, y, (ColorComponents)comp, requiredComponents);
 		}
 
 		public static ImageResultFloat FromMemory(byte[] data,
@@ -68,6 +59,22 @@ namespace StbImageSharp
 			{
 				return FromStream(stream, requiredComponents);
 			}
+		}
+
+		private unsafe void Dispose(bool disposing)
+		{
+			CRuntime.free(DataPtr);
+		}
+
+		public void Dispose()
+		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+
+		~ImageResultFloat()
+		{
+			Dispose(false);
 		}
 	}
 }
