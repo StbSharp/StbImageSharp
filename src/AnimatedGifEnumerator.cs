@@ -76,30 +76,27 @@ namespace StbImageSharp
 
 		protected unsafe virtual void Dispose(bool disposing)
 		{
-			if (disposing)
+			if (_gif != null)
 			{
-				if (_gif != null)
+				if (_gif._out_ != null)
 				{
-					if (_gif._out_ != null)
-					{
-						CRuntime.free(_gif._out_);
-						_gif._out_ = null;
-					}
-
-					if (_gif.history != null)
-					{
-						CRuntime.free(_gif.history);
-						_gif.history = null;
-					}
-
-					if (_gif.background != null)
-					{
-						CRuntime.free(_gif.background);
-						_gif.background = null;
-					}
-
-					_gif = null;
+					CRuntime.free(_gif._out_);
+					_gif._out_ = null;
 				}
+
+				if (_gif.history != null)
+				{
+					CRuntime.free(_gif.history);
+					_gif.history = null;
+				}
+
+				if (_gif.background != null)
+				{
+					CRuntime.free(_gif.background);
+					_gif.background = null;
+				}
+
+				_gif = null;
 			}
 		}
 	}
