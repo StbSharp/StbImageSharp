@@ -80,8 +80,9 @@ namespace StbImageSharp
 			hdr_data = (float*)stbi__malloc_mad4(width, height, req_comp, sizeof(float), 0);
 			if (hdr_data == null)
 				return (float*)(ulong)(stbi__err("outofmem") != 0 ? 0 : 0);
-			main_decode_loop:
+
 			var enterMainDecode = false;
+			main_decode_loop:
 			if (enterMainDecode)
 			{
 				for (; j < height; ++j)
@@ -119,6 +120,7 @@ namespace StbImageSharp
 					i = 1;
 					j = 0;
 					CRuntime.free(scanline);
+					enterMainDecode = true;
 					goto main_decode_loop;
 				}
 
