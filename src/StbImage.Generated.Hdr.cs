@@ -22,6 +22,7 @@ namespace StbImageSharp
 		public static float* stbi__hdr_load(stbi__context s, int* x, int* y, int* comp, int req_comp,
 			stbi__result_info* ri)
 		{
+			var rgbe = stackalloc byte[4];
 			var buffer = stackalloc sbyte[1024];
 			sbyte* token;
 			var valid = 0;
@@ -86,7 +87,7 @@ namespace StbImageSharp
 				for (; j < height; ++j)
 					for (; i < width; ++i)
 					{
-						var rgbe = stackalloc byte[4];
+						//var rgbe = stackalloc byte[4];
 						stbi__getn(s, rgbe, 4);
 						stbi__hdr_convert(hdr_data + j * width * req_comp + i * req_comp, rgbe, req_comp);
 					}
@@ -109,7 +110,7 @@ namespace StbImageSharp
 				len = stbi__get8(s);
 				if (c1 != 2 || c2 != 2 || (len & 0x80) != 0)
 				{
-					var rgbe = stackalloc byte[4];
+					//var rgbe = stackalloc byte[4];
 					rgbe[0] = (byte)c1;
 					rgbe[1] = (byte)c2;
 					rgbe[2] = (byte)len;
