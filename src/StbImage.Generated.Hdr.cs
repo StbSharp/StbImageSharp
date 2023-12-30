@@ -83,121 +83,121 @@ namespace StbImageSharp
 
 			if (width < 8 || width >= 32768)
 			{
-                for (; j < height; ++j)
+				for (; j < height; ++j)
 				{
-                    for (; i < width; ++i)
-                    {
-                        //var rgbe = stackalloc byte[4];
-                        stbi__getn(s, rgbe, 4);
-                        stbi__hdr_convert(hdr_data + j * width * req_comp + i * req_comp, rgbe, req_comp);
-                    }
+					for (; i < width; ++i)
+					{
+						//var rgbe = stackalloc byte[4];
+						stbi__getn(s, rgbe, 4);
+						stbi__hdr_convert(hdr_data + j * width * req_comp + i * req_comp, rgbe, req_comp);
+					}
 				}
-            }
+			}
 			else
 			{
-                scanline = null;
-                for (j = 0; j < height; ++j)
-                {
-                    c1 = stbi__get8(s);
-                    c2 = stbi__get8(s);
-                    len = stbi__get8(s);
-                    if (c1 != 2 || c2 != 2 || (len & 0x80) != 0)
-                    {
-                        //var rgbe = stackalloc byte[4];
-                        rgbe[0] = (byte)c1;
-                        rgbe[1] = (byte)c2;
-                        rgbe[2] = (byte)len;
-                        rgbe[3] = stbi__get8(s);
-                        stbi__hdr_convert(hdr_data, rgbe, req_comp);
-                        CRuntime.free(scanline);
+				scanline = null;
+				for (j = 0; j < height; ++j)
+				{
+					c1 = stbi__get8(s);
+					c2 = stbi__get8(s);
+					len = stbi__get8(s);
+					if (c1 != 2 || c2 != 2 || (len & 0x80) != 0)
+					{
+						//var rgbe = stackalloc byte[4];
+						rgbe[0] = (byte)c1;
+						rgbe[1] = (byte)c2;
+						rgbe[2] = (byte)len;
+						rgbe[3] = stbi__get8(s);
+						stbi__hdr_convert(hdr_data, rgbe, req_comp);
+						CRuntime.free(scanline);
 
 						// goto main_decode_loop
 
 						// Do first row
 						j = 0;
-                        for (i = 1; i < width; ++i)
-                        {
-                            //var rgbe = stackalloc byte[4];
-                            stbi__getn(s, rgbe, 4);
-                            stbi__hdr_convert(hdr_data + j * width * req_comp + i * req_comp, rgbe, req_comp);
-                        }
+						for (i = 1; i < width; ++i)
+						{
+							//var rgbe = stackalloc byte[4];
+							stbi__getn(s, rgbe, 4);
+							stbi__hdr_convert(hdr_data + j * width * req_comp + i * req_comp, rgbe, req_comp);
+						}
 
 						// Do the rest of the rows.
-                        for (j = 1; j < height; ++j)
-                        {
-                            for (i = 0; i < width; ++i)
-                            {
-                                //var rgbe = stackalloc byte[4];
-                                stbi__getn(s, rgbe, 4);
-                                stbi__hdr_convert(hdr_data + j * width * req_comp + i * req_comp, rgbe, req_comp);
-                            }
-                        }
+						for (j = 1; j < height; ++j)
+						{
+							for (i = 0; i < width; ++i)
+							{
+								//var rgbe = stackalloc byte[4];
+								stbi__getn(s, rgbe, 4);
+								stbi__hdr_convert(hdr_data + j * width * req_comp + i * req_comp, rgbe, req_comp);
+							}
+						}
 
 						goto finish;
-                    }
+					}
 
-                    len <<= 8;
-                    len |= stbi__get8(s);
-                    if (len != width)
-                    {
-                        CRuntime.free(hdr_data);
-                        CRuntime.free(scanline);
-                        return (float*)(ulong)(stbi__err("invalid decoded scanline length") != 0 ? 0 : 0);
-                    }
+					len <<= 8;
+					len |= stbi__get8(s);
+					if (len != width)
+					{
+						CRuntime.free(hdr_data);
+						CRuntime.free(scanline);
+						return (float*)(ulong)(stbi__err("invalid decoded scanline length") != 0 ? 0 : 0);
+					}
 
-                    if (scanline == null)
-                    {
-                        scanline = (byte*)stbi__malloc_mad2(width, 4, 0);
-                        if (scanline == null)
-                        {
-                            CRuntime.free(hdr_data);
-                            return (float*)(ulong)(stbi__err("outofmem") != 0 ? 0 : 0);
-                        }
-                    }
+					if (scanline == null)
+					{
+						scanline = (byte*)stbi__malloc_mad2(width, 4, 0);
+						if (scanline == null)
+						{
+							CRuntime.free(hdr_data);
+							return (float*)(ulong)(stbi__err("outofmem") != 0 ? 0 : 0);
+						}
+					}
 
-                    for (k = 0; k < 4; ++k)
-                    {
-                        var nleft = 0;
-                        i = 0;
-                        while ((nleft = width - i) > 0)
-                        {
-                            count = stbi__get8(s);
-                            if (count > 128)
-                            {
-                                value = stbi__get8(s);
-                                count -= 128;
-                                if (count > nleft)
-                                {
-                                    CRuntime.free(hdr_data);
-                                    CRuntime.free(scanline);
-                                    return (float*)(ulong)(stbi__err("corrupt") != 0 ? 0 : 0);
-                                }
+					for (k = 0; k < 4; ++k)
+					{
+						var nleft = 0;
+						i = 0;
+						while ((nleft = width - i) > 0)
+						{
+							count = stbi__get8(s);
+							if (count > 128)
+							{
+								value = stbi__get8(s);
+								count -= 128;
+								if (count > nleft)
+								{
+									CRuntime.free(hdr_data);
+									CRuntime.free(scanline);
+									return (float*)(ulong)(stbi__err("corrupt") != 0 ? 0 : 0);
+								}
 
-                                for (z = 0; z < count; ++z)
-                                    scanline[i++ * 4 + k] = value;
-                            }
-                            else
-                            {
-                                if (count > nleft)
-                                {
-                                    CRuntime.free(hdr_data);
-                                    CRuntime.free(scanline);
-                                    return (float*)(ulong)(stbi__err("corrupt") != 0 ? 0 : 0);
-                                }
+								for (z = 0; z < count; ++z)
+									scanline[i++ * 4 + k] = value;
+							}
+							else
+							{
+								if (count > nleft)
+								{
+									CRuntime.free(hdr_data);
+									CRuntime.free(scanline);
+									return (float*)(ulong)(stbi__err("corrupt") != 0 ? 0 : 0);
+								}
 
-                                for (z = 0; z < count; ++z)
-                                    scanline[i++ * 4 + k] = stbi__get8(s);
-                            }
-                        }
-                    }
+								for (z = 0; z < count; ++z)
+									scanline[i++ * 4 + k] = stbi__get8(s);
+							}
+						}
+					}
 
-                    for (i = 0; i < width; ++i)
-                        stbi__hdr_convert(hdr_data + (j * width + i) * req_comp, scanline + i * 4, req_comp);
-                }
+					for (i = 0; i < width; ++i)
+						stbi__hdr_convert(hdr_data + (j * width + i) * req_comp, scanline + i * 4, req_comp);
+				}
 
-                if (scanline != null)
-                    CRuntime.free(scanline);
-            }
+				if (scanline != null)
+					CRuntime.free(scanline);
+			}
 
 			finish:
 			return hdr_data;
