@@ -870,9 +870,9 @@ namespace StbImageSharp
 					return L == 0 ? 1 : 0;
 				case 0xC4:
 					L = stbi__get16be(z.s) - 2;
+					var sizes = stackalloc int[16];
 					while (L > 0)
 					{
-						var sizes = stackalloc int[16];
 						var i = 0;
 						var n = 0;
 						int q = stbi__get8(z.s);
