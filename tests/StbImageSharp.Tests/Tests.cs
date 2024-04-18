@@ -1,5 +1,4 @@
-﻿using Hebron.Runtime;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using StbImageSharp.Tests.Utility;
 using System;
 using System.IO;
@@ -26,6 +25,7 @@ namespace StbImageSharp.Tests
 			});
 		}
 
+		[TestCase("IDockable.png", 715, 426, ColorComponents.RedGreenBlueAlpha)]
 		[TestCase("sample_1280×853.hdr", 1280, 853, ColorComponents.RedGreenBlue)]
 		[TestCase("DockPanes.jpg", 609, 406, ColorComponents.RedGreenBlue)]
 		public void Load(string filename, int width, int height, ColorComponents colorComponents)
@@ -37,12 +37,12 @@ namespace StbImageSharp.Tests
 			}
 
 			Assert.IsNotNull(result);
-			Assert.AreEqual(result.Width, width);
-			Assert.AreEqual(result.Height, height);
-			Assert.AreEqual(result.Comp, ColorComponents.RedGreenBlueAlpha);
-			Assert.AreEqual(result.SourceComp, colorComponents);
+			Assert.AreEqual(width, result.Width);
+			Assert.AreEqual(height, result.Height);
+			Assert.AreEqual(ColorComponents.RedGreenBlueAlpha, result.Comp);
+			Assert.AreEqual(colorComponents, result.SourceComp);
 			Assert.IsNotNull(result.Data);
-			Assert.AreEqual(result.Data.Length, result.Width * result.Height * 4);
+			Assert.AreEqual(result.Width * result.Height * 4, result.Data.Length);
 		}
 
 		[TestCase("sample_1280×853.hdr", 1280, 853, ColorComponents.RedGreenBlue)]
@@ -55,12 +55,12 @@ namespace StbImageSharp.Tests
 			}
 
 			Assert.IsNotNull(result);
-			Assert.AreEqual(result.Width, width);
-			Assert.AreEqual(result.Height, height);
-			Assert.AreEqual(result.Comp, ColorComponents.RedGreenBlueAlpha);
-			Assert.AreEqual(result.SourceComp, colorComponents);
+			Assert.AreEqual(width, result.Width);
+			Assert.AreEqual(height, result.Height);
+			Assert.AreEqual(ColorComponents.RedGreenBlueAlpha, result.Comp);
+			Assert.AreEqual(colorComponents, result.SourceComp);
 			Assert.IsNotNull(result.Data);
-			Assert.AreEqual(result.Data.Length, result.Width * result.Height * 4);
+			Assert.AreEqual(result.Width * result.Height * 4, result.Data.Length);
 		}
 
 		[TestCase("sample_1280×853.hdr", 2000, 1280, 853, ColorComponents.RedGreenBlue, false)]
@@ -83,10 +83,10 @@ namespace StbImageSharp.Tests
 			Assert.IsNotNull(result);
 
 			var info = result.Value;
-			Assert.AreEqual(info.Width, width);
-			Assert.AreEqual(info.Height, height);
-			Assert.AreEqual(info.ColorComponents, colorComponents);
-			Assert.AreEqual(info.BitsPerChannel, is16bit ? 16 : 8);
+			Assert.AreEqual(width, info.Width);
+			Assert.AreEqual(height, info.Height);
+			Assert.AreEqual(colorComponents, info.ColorComponents);
+			Assert.AreEqual(is16bit ? 16 : 8, info.BitsPerChannel);
 		}
 
 		[TestCase("somersault.gif", 384, 480, ColorComponents.RedGreenBlueAlpha, 43)]
@@ -97,11 +97,11 @@ namespace StbImageSharp.Tests
 				var frameCount = 0;
 				foreach(var frame in ImageResult.AnimatedGifFramesFromStream(stream))
 				{
-					Assert.AreEqual(frame.Width, width);
-					Assert.AreEqual(frame.Height, height);
-					Assert.AreEqual(frame.Comp, colorComponents);
+					Assert.AreEqual(width, frame.Width);
+					Assert.AreEqual(height, frame.Height);
+					Assert.AreEqual(colorComponents, frame.Comp);
 					Assert.IsNotNull(frame.Data);
-					Assert.AreEqual(frame.Data.Length, frame.Width * frame.Height * (int)frame.Comp);
+					Assert.AreEqual(frame.Width * frame.Height * (int)frame.Comp, frame.Data.Length);
 
 					++frameCount;
 				}
@@ -111,7 +111,7 @@ namespace StbImageSharp.Tests
 				stream.Seek(0, SeekOrigin.Begin);
 			}
 
-			Assert.AreEqual(StbImage.NativeAllocations, 0);
+			Assert.AreEqual(0, StbImage.NativeAllocations);
 		}
 	}
 }

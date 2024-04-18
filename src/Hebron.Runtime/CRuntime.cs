@@ -33,10 +33,7 @@ namespace Hebron.Runtime
 
 		public static void memcpy(void* a, void* b, long size)
 		{
-			var ap = (byte*)a;
-			var bp = (byte*)b;
-			for (long i = 0; i < size; ++i)
-				*ap++ = *bp++;
+			Buffer.MemoryCopy(b, a, size, size);
 		}
 
 		public static void memcpy(void* a, void* b, ulong size)
@@ -62,11 +59,6 @@ namespace Hebron.Runtime
 			}
 		}
 
-		public static void memmove(void* a, void* b, ulong size)
-		{
-			memmove(a, b, (long)size);
-		}
-
 		public static int memcmp(void* a, void* b, long size)
 		{
 			var result = 0;
@@ -82,19 +74,6 @@ namespace Hebron.Runtime
 			}
 
 			return result;
-		}
-
-		public static int memcmp(void* a, void* b, ulong size)
-		{
-			return memcmp(a, b, (long)size);
-		}
-
-		public static int memcmp(byte* a, byte[] b, ulong size)
-		{
-			fixed (void* bptr = b)
-			{
-				return memcmp(a, bptr, (long)size);
-			}
 		}
 
 		public static void memset(void* ptr, int value, long size)
@@ -139,12 +118,6 @@ namespace Hebron.Runtime
 		public static double pow(double a, double b)
 		{
 			return Math.Pow(a, b);
-		}
-
-		public static void SetArray<T>(T[] data, T value)
-		{
-			for (var i = 0; i < data.Length; ++i)
-				data[i] = value;
 		}
 
 		public static double ldexp(double number, int exponent)
