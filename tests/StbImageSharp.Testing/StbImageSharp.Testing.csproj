@@ -4,10 +4,24 @@
     <TargetFramework>net6.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-	<PackageReference Include="SixLabors.ImageSharp" Version="3.1.4" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.4" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\StbImageSharp.csproj" />
     <ProjectReference Include="..\Stb.Native\Stb.Native.vcxproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="SixLabors.ImageSharp, Version=2.0.0.0, Culture=neutral, PublicKeyToken=d998eea7b14cab13">
+      <HintPath>..\packages\SixLabors.ImageSharp.2.1.9\lib\netcoreapp3.1\SixLabors.ImageSharp.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.6.0.0\lib\net6.0\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Text.Encoding.CodePages, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <HintPath>..\packages\System.Text.Encoding.CodePages.8.0.0\lib\net6.0\System.Text.Encoding.CodePages.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
 </Project>
