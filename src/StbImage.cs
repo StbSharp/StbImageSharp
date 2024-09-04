@@ -15,10 +15,18 @@ namespace StbImageSharp
 		public static string stbi__g_failure_reason;
 		public static readonly char[] stbi__parse_png_file_invalid_chunk = new char[25];
 
-		public static int NativeAllocations => MemoryStats.Allocations;
+		public static int NativeAllocations
+		{
+			get
+			{
+				return MemoryStats.Allocations;
+			}
+		}
 
 		public class stbi__context
 		{
+			private readonly Stream _stream;
+
 			public byte[] _tempBuffer;
 			public int img_n = 0;
 			public int img_out_n = 0;
@@ -30,10 +38,16 @@ namespace StbImageSharp
 				if (stream == null)
 					throw new ArgumentNullException("stream");
 
-				Stream = stream;
+				_stream = stream;
 			}
 
-			public Stream Stream { get; }
+			public Stream Stream
+			{
+				get
+				{
+					return _stream;
+				}
+			}
 		}
 
 		private static int stbi__err(string str)

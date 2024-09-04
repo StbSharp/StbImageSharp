@@ -70,7 +70,9 @@ namespace StbImageSharp
 			byte* tga_palette = null;
 			var i = 0;
 			var j = 0;
-			var raw_data = stackalloc byte[] { 0, 0, 0, 0 };
+			var raw_data = stackalloc byte[4];
+			raw_data[0] = 0;
+
 			var RLE_count = 0;
 			var RLE_repeating = 0;
 			var read_next_pixel = 1;
