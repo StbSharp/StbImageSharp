@@ -11,24 +11,37 @@ namespace StbImageSharp
 	{
 		private readonly StbImage.stbi__context _context;
 		private StbImage.stbi__gif _gif;
+		private readonly ColorComponents _colorComponents;		
 
 		public AnimatedGifEnumerator(Stream input, ColorComponents colorComponents)
 		{
-			if (input == null) throw new ArgumentNullException(nameof(input));
+			if (input == null) throw new ArgumentNullException("input");
 
 			_context = new StbImage.stbi__context(input);
 
 			if (StbImage.stbi__gif_test(_context) == 0) throw new Exception("Input stream is not GIF file.");
 
 			_gif = new StbImage.stbi__gif();
-			ColorComponents = colorComponents;
+			_colorComponents = colorComponents;
 		}
 
-		public ColorComponents ColorComponents { get; }
+		public ColorComponents ColorComponents
+		{
+			get
+			{
+				return _colorComponents;
+			}
+		}
 
 		public AnimatedFrameResult Current { get; private set; }
 
-		object IEnumerator.Current => Current;
+		object IEnumerator.Current
+		{
+			get
+			{
+				return Current;
+			}
+		}
 
 		public void Dispose()
 		{
@@ -104,14 +117,21 @@ namespace StbImageSharp
 	internal class AnimatedGifEnumerable : IEnumerable<AnimatedFrameResult>
 	{
 		private readonly Stream _input;
+		private readonly ColorComponents _colorComponents;		
 
 		public AnimatedGifEnumerable(Stream input, ColorComponents colorComponents)
 		{
 			_input = input;
-			ColorComponents = colorComponents;
+			_colorComponents = colorComponents;
 		}
 
-		public ColorComponents ColorComponents { get; }
+		public ColorComponents ColorComponents
+		{
+			get
+			{
+				return _colorComponents;
+			}
+		}
 
 		public IEnumerator<AnimatedFrameResult> GetEnumerator()
 		{
