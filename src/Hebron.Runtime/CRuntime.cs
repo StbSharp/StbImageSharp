@@ -33,7 +33,10 @@ namespace Hebron.Runtime
 
 		public static void memcpy(void* a, void* b, long size)
 		{
-			Buffer.MemoryCopy(b, a, size, size);
+			var ap = (byte*)a;
+			var bp = (byte*)b;
+			for (long i = 0; i < size; ++i)
+				*ap++ = *bp++;
 		}
 
 		public static void memcpy(void* a, void* b, ulong size)
