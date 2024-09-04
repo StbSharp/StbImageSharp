@@ -600,6 +600,8 @@ namespace StbImageSharp
 			byte has_trans = 0;
 			var tc = stackalloc byte[3];
 			tc[0] = 0;
+			tc[1] = 0;
+			tc[2] = 0;
 			var tc16 = stackalloc ushort[3];
 			uint ioff = 0;
 			uint idata_limit = 0;

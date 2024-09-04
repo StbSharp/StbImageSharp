@@ -72,7 +72,9 @@ namespace StbImageSharp
 			var j = 0;
 			var raw_data = stackalloc byte[4];
 			raw_data[0] = 0;
-
+			raw_data[1] = 0;
+			raw_data[2] = 0;
+			raw_data[3] = 0;
 			var RLE_count = 0;
 			var RLE_repeating = 0;
 			var read_next_pixel = 1;
