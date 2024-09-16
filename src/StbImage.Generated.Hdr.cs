@@ -166,7 +166,7 @@ namespace StbImageSharp
 							{
 								value = stbi__get8(s);
 								count -= 128;
-								if (count > nleft)
+								if (count == 0 || count > nleft)
 								{
 									CRuntime.free(hdr_data);
 									CRuntime.free(scanline);
@@ -178,7 +178,7 @@ namespace StbImageSharp
 							}
 							else
 							{
-								if (count > nleft)
+								if (count == 0 || count > nleft)
 								{
 									CRuntime.free(hdr_data);
 									CRuntime.free(scanline);
