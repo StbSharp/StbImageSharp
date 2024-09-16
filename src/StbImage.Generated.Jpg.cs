@@ -1461,7 +1461,11 @@ namespace StbImageSharp
 				uint i = 0;
 				uint j = 0;
 				byte* output;
-				var coutput = stackalloc byte*[] { null, null, null, null };
+				var coutput = stackalloc byte*[4];
+				coutput[0] = null;
+				coutput[1] = null;
+				coutput[2] = null;
+				coutput[3] = null;
 				var res_comp = new stbi__resample[4];
 				res_comp[0] = new stbi__resample();
 				res_comp[1] = new stbi__resample();
