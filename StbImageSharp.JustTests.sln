@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32328.378
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StbImageSharp", "src\StbImageSharp.csproj", "{A0123FC9-6FB4-448D-94D1-84433B317FAB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{AD5041AC-C96B-42F8-BC8C-BFFD2090B364}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StbImageSharp.Tests", "tests\StbImageSharp.Tests\StbImageSharp.Tests.csproj", "{5FA15FA0-17F2-446C-8EB7-50281F9C9B34}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A0123FC9-6FB4-448D-94D1-84433B317FAB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A0123FC9-6FB4-448D-94D1-84433B317FAB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A0123FC9-6FB4-448D-94D1-84433B317FAB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A0123FC9-6FB4-448D-94D1-84433B317FAB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5FA15FA0-17F2-446C-8EB7-50281F9C9B34}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5FA15FA0-17F2-446C-8EB7-50281F9C9B34}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5FA15FA0-17F2-446C-8EB7-50281F9C9B34}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5FA15FA0-17F2-446C-8EB7-50281F9C9B34}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{5FA15FA0-17F2-446C-8EB7-50281F9C9B34} = {AD5041AC-C96B-42F8-BC8C-BFFD2090B364}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C9C812E7-F89A-4B6E-8F9D-981D5F8BBAB3}
+	EndGlobalSection
+EndGlobal
