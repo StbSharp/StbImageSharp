@@ -16,7 +16,9 @@ jobs:
       with:
         dotnet-version: '6.0.x'
     - name: Build StbImageSharp
-      run: dotnet build src\StbImageSharp.csproj --configuration Release
+      run: dotnet build StbImageSharp.JustTests.sln --configuration Release
+    - name: Test
+      run: dotnet test StbImageSharp.JustTests.sln
     - name: Install NuGet
       uses: NuGet/setup-nuget@v1
     - name: Publish StbImageSharp to NuGet
