@@ -20,6 +20,6 @@ jobs:
       with:
         dotnet-version: '6.0.x'
     - name: Build StbImageSharp
-      run: dotnet build StbImageSharp.sln --configuration Release
+      run: dotnet build StbImageSharp.JustTests.sln --configuration Release
     - name: Test
-      run: dotnet test StbImageSharp.sln
+      run: dotnet test StbImageSharp.JustTests.sln
