@@ -1,6 +1,6 @@
 # StbImageSharp
 [![Nuget](https://img.shields.io/nuget/dt/StbImageSharp)](https://www.nuget.org/packages/StbImageSharp/)
-![Build & Publish](https://github.com/StbSharp/StbImageSharp/workflows/Build%20&%20Publish/badge.svg)
+[![Build & Publish Beta](https://github.com/StbSharp/StbImageSharp/actions/workflows/build-and-publish-beta.yml/badge.svg)](https://github.com/StbSharp/StbImageSharp/actions/workflows/build-and-publish-beta.yml)
 [![Chat](https://img.shields.io/discord/628186029488340992.svg)](https://discord.gg/ZeHxhCY)
 
 StbImageSharp is C# port of the stb_image.h, which is C library to load images in JPG, PNG, BMP, TGA, PSD, GIF and HDR formats.
