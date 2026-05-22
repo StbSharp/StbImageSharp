@@ -1,4 +1,4 @@
-﻿using Hebron.Runtime;
+﻿using StbImageSharp.Hebron.Runtime;
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
