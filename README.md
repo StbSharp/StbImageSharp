@@ -131,11 +131,14 @@ Public Domain
 2. Open StbImageSharp.sln.
 
 ## Sponsor
-https://www.patreon.com/rds1983
+If this project is useful for you, you can support development:
+- Boosty: https://boosty.to/rds1983
+- Telegram Wallet: https://t.me/rds1983
 
-https://boosty.to/rds1983
+### Crypto
+USDT (TON): `UQCQy6tFInPvqinE44zHY4R0rYS3niaBikkqiSyGmyoAMwyO`
 
-bitcoin: 3GeKFcv8X1cn8WqH1mr8i7jgPBkQjQuyN1
+TON: `UQCQy6tFInPvqinE44zHY4R0rYS3niaBikkqiSyGmyoAMwyO`
 
 # Credits
 * [stb](https://github.com/nothings/stb)
