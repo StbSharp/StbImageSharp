@@ -1,3 +1,5 @@
+**Important:** [StbImageNext](https://github.com/StbSharp/StbImageNext) is the safe and recommended alternative of this project.
+
 # StbImageSharp
 [![Nuget](https://img.shields.io/nuget/dt/StbImageSharp)](https://www.nuget.org/packages/StbImageSharp/)
 [![Build & Publish Beta](https://github.com/StbSharp/StbImageSharp/actions/workflows/build-and-publish-beta.yml/badge.svg)](https://github.com/StbSharp/StbImageSharp/actions/workflows/build-and-publish-beta.yml)
